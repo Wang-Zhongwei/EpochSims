@@ -1,0 +1,9 @@
+*cache*
+*.npy
+*.out
+*.dat
+*test*
+*.log
+*.job
+temp
+deck
