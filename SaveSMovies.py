@@ -4,7 +4,6 @@ import os
 from utils import *
 
 
-
 @timer
 def save_scalar_frames(inp_folder: str, frame_slice: slice, scalar_field: Scalar=Scalar.NUMBER_DENSITY, species: Species = Species.PROTON, plane: Plane = Plane.XY, out_folder: str = None, save_grid: bool = False):
     """Save scalar movie as numpy array

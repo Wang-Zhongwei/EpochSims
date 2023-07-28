@@ -7,14 +7,22 @@ class Species(Enum):
     CARBON = 'Carbon'
 
 class Plane(Enum):
-    XY = 'xy'
-    XZ = 'xz'
-    YZ = 'yz'
-    XYZ = 'xyz'
+    XY = 'XY'
+    XZ = 'XZ'
+    YZ = 'YZ'
+    XYZ = 'XYZ'
 
 class Scalar(Enum):
     NUMBER_DENSITY = 'Derived_Number_Density'
     TEMPERATURE = 'Derived_Temperature'
+
+class Vector(Enum):
+    Ex = 'Electric_Field_Ex'
+    Ey = 'Electric_Field_Ey'
+    Ez = 'Electric_Field_Ez'
+    Bx = 'Magnetic_Field_Bx'
+    By = 'Magnetic_Field_By'
+    Bz = 'Magnetic_Field_Bz'
 
 def timer(func):
     def wrapper(*args, **kwargs):

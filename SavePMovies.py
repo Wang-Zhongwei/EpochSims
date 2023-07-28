@@ -106,4 +106,4 @@ if __name__ == '__main__':
     #     save_species_to_csv(inp_path, Species.PROTON, out_path, E_cutoff_MeV=1, decimation_ratio=1)
     #     print(f'Saved {out_path}')
 
-    combine_frames_to_leaving_particles(out_folder, 5e-6)
+    combine_frames_to_leaving_particles(out_folder, 5e-6, 'data/3d/processed/leaving_particles.csv')
