@@ -1,0 +1,18 @@
+#!/bin/bash
+#SBATCH --time=01:00:00
+#SBATCH --nodes=1 --ntasks-per-node=24
+#SBATCH --job-name=ParticleTracking
+#SBATCH --mem=300gb
+#SBATCH --account=PAS0035
+#PBS -m abe
+
+cd # CHANGE DIRECTORY TO YOUR OWN
+
+module load python
+
+python < ParticleTracking.py > ParticleTracking.out
+
+
+
+
+

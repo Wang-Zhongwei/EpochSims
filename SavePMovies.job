@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH --time=02:00:00
+#SBATCH --nodes=10 --ntasks-per-node=24
+#SBATCH --job-name=SavePMovies_Filtered
+#SBATCH --account=PAS0035
+#PBS -m abe
+
+/users/PAS2137/wang15032/.conda/envs/general/bin/python SavePMovies.py 
+
+
+
+
+
