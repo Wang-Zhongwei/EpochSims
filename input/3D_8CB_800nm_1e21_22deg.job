@@ -1,0 +1,28 @@
+#!/bin/bash
+#SBATCH --time=18:00:00
+#SBATCH --nodes=24 --ntasks-per-node=40
+#SBATCH --job-name=2023-08-01_3D_8CB_800nm_1e21_22deg
+#SBATCH --account=PAS0035
+#PBS -m abe
+
+experiment_name=2023-08-01_3D_8CB_800nm_1e21_22deg
+deck_name=3D_8CB_800nm_1e21_22deg.deck
+job_name=3D_8CB_800nm_1e21_22deg.job
+num_procs=960
+
+epoch_base_path=$HOME/epoch/epoch3d
+epoch_bin_path=$epoch_base_path/bin/epoch3d
+input_dir_path=$HOME/EpochSims/input
+output_dir_path=$LUSTRE_HOME/EpochOutput/$experiment_name
+
+mkdir -p $output_dir_path
+echo -e $output_dir_path >$output_dir_path/USE_DATA_DIRECTORY
+cp $epoch_base_path/Makefile $output_dir_path/Makefile
+cp $input_dir_path/$job_name $output_dir_path/$job_name
+cp $input_dir_path/$deck_name $output_dir_path/input.deck
+cp $input_dir_path/ElecDens.dat $output_dir_path/ElecDens.dat
+cp $input_dir_path/ProtDens.dat $output_dir_path/ProtDens.dat
+cp $input_dir_path/CarbDens.dat $output_dir_path/CarbDens.dat
+cd $output_dir_path
+
+mpiexec -n $num_procs $epoch_bin_path $output_dir_path/$deck_name >$output_dir_path/log.txt

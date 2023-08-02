@@ -88,7 +88,7 @@ begin:constant
 
   # These two set the beam focus
   w_0 = laser_spot*micron 		# Beam waist size
-  x_spot = 0			# Distance from x_min to spot
+  x_spot = -x_min/2			# Distance from x_min to spot
 
   # These are the parameters calculated for driving the laser
   # These should not need to be modified

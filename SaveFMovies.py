@@ -50,8 +50,8 @@ if __name__ == "__main__":
     from configs.config import *
 
     # save vector movies
-    for vector in [Vector.Ex, Vector.Ey, Vector.Ez, Vector.Bx, Vector.By, Vector.Bz]:
-        for plane in [Plane.XY, Plane.XZ, Plane.YZ]:
+    for vector in (Vector.Ex, Vector.Ey, Vector.Ez, Vector.Bx, Vector.By, Vector.Bz):
+        for plane in (Plane.XY, Plane.YZ):
             save_vector_frames(
                 epoch_output_path, slice(None, None, 10), vector, plane, raw_data_path
             )
