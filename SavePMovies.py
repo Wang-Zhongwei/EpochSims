@@ -116,16 +116,17 @@ def combine_frames_to_leaving_particles(inp_folder, x_cutoff, out_path=None):
 if __name__ == "__main__":
     from configs.config import *
 
-    os.makedirs(raw_data_path, exist_ok=True)
-    os.makedirs(processed_data_path, exist_ok=True)
-    os.makedirs(media_path, exist_ok=True)
-    # TODO: replace 321 with number of frames in simulation 
+    os.makedirs(raw_data_folder, exist_ok=True)
+    os.makedirs(processed_data_folder, exist_ok=True)
+    os.makedirs(media_folder, exist_ok=True)
+    
+    # TODO: replace 321 with number of frames in simulation
     for i in range(0, 321, 10):
-        inp_path = os.path.join(epoch_output_path, f"pmovie_{i:04}.sdf")
-        out_path = os.path.join(raw_data_path, f"TNSAProton_{i:04}.csv")
+        inp_path = os.path.join(epoch_output_folder, f"pmovie_{i:04}.sdf")
+        out_path = os.path.join(raw_data_folder, f"TNSAProton_{i:04}.csv")
         save_species_to_csv(inp_path, Species.PROTON, out_path, E_cutoff_MeV=1, decimation_ratio=1)
         print(f"Saved {out_path}")
 
     combine_frames_to_leaving_particles(
-        raw_data_path, 5e-6, os.path.join(processed_data_path, leaving_particles_file_name)
+        raw_data_folder, 5e-6, os.path.join(processed_data_folder, leaving_particles_file_name)
     )

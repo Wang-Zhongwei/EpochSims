@@ -1,3 +1,4 @@
+#
 import sdf_helper as sh
 import numpy as np
 import os
@@ -78,11 +79,11 @@ if __name__ == "__main__":
         for plane in (Plane.XY, Plane.YZ):
             for field in (Scalar.NUMBER_DENSITY, Scalar.TEMPERATURE):
                 save_scalar_frames(
-                    epoch_output_path,
+                    epoch_output_folder,
                     slice(None),
                     scalar_field=field,
                     species=species,
-                    out_folder=raw_data_path,
+                    out_folder=raw_data_folder,
                     plane=plane,
-                    save_grid=True,
+                    save_grid=False,
                 )
