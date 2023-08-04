@@ -10,14 +10,14 @@ def save_vector_frames(
     vector_field: Vector = Vector.Ey,
     plane: Plane = Plane.XY,
     out_folder: str = None,
+    prefix: str = "fmovie"
 ):
-    prefix = "fmovie"
     start = frame_slice.start if frame_slice.start is not None else 0
     step = frame_slice.step if frame_slice.step is not None else 1
     num_files = len([f for f in os.listdir(inp_folder) if f.startswith(prefix)])
     stop = frame_slice.stop if frame_slice.stop is not None else num_files
     frames = np.arange(start, stop, step)
-    out_file_name = f"{vector_field.value}_{plane.value}_{start}_{stop}_{step}.npy"
+    out_file_name = f"{vector_field.value}_{plane.value}.npy"
 
     slices = [slice(None), slice(None), slice(None)]
     if plane == Plane.XY:
@@ -48,6 +48,10 @@ def save_vector_frames(
 
 if __name__ == "__main__":
     from configs.config import *
+
+    os.makedirs(raw_data_folder, exist_ok=True)
+    os.makedirs(processed_data_folder, exist_ok=True)
+    os.makedirs(media_folder, exist_ok=True)
 
     # save vector movies
     for vector in (Vector.Ex, Vector.Ey, Vector.Ez, Vector.Bx, Vector.By, Vector.Bz):

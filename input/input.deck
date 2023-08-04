@@ -1,0 +1,340 @@
+
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+begin:control
+  deck_warnings_fatal = F 	# Abort simulation if deck is setup incorrectly.
+
+  # Parallelization Parameters
+  balance_first = T 		# Attempt load balancing on initialization
+  dlb_threshold = 0.5 		# Dynamic Load Balancing threshold		
+
+  # Field Modifiers:
+  maxwell_solver = yee 		# Default value
+  field_order = 2		# Default value
+  smooth_currents = F 		# Do not apply artificial field smoothing
+
+
+  # Simulation time:
+  t_end = 320 * femto 		
+  dt_multiplier = 0.90 		# Courant Condition
+
+  # Define the simulation grid.
+  x_min = -10 * micron
+  x_max = 10 * micron
+  nx = 1250 			# dx = 16nm
+  y_min = -9*micron
+  y_max = 14*micron
+  ny = 767 			# dy = 30nm
+  z_min = -9*micron
+  z_max = 9*micron
+  nz = 600 			# dz = 30nm
+
+end:control
+
+begin:collisions
+  use_collisions = F		# Explicitly turn off collisions.
+end:collisions
+
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------@------------------------------------------------
+
+# Define useful constants and functions
+# Most physical properties should be changed here.
+begin:constant
+
+  # Particle Properties
+  #------------------------------------------------------------------------------------------
+  # Macroparticles per cell for each species
+  n_elec_per_cell = 27
+  n_prot_per_cell = 27
+  n_carb_per_cell = 27
+ 	
+  n_elec = 3.274368e29                  # m^-3
+  n_prot = 5.60094e28                   # m^-3
+  n_carb = 4.52379e28                   # m^-3
+  n_crit = 1.7343954e27 		# m^-3 
+
+  elec_temp = 10 			# Temperature (in eV)
+  prot_temp = 10 			# Temperature (in eV)
+  carb_temp = 10 			# Temperature (in eV)
+
+  # Laser Parameters
+  #------------------------------------------------------------------------------------------
+  E0 = 3.618439e13  			# Electric field amplitude (V/m), equivalent to 1.73811*10^20 W/cm^2
+  lambda0 = 800e-9 			# Laser wavelength
+  laser_spot = 1 			# Laser spotsize radius (in um)
+  incident_angle = 22 			# Incident angle w.r.t x_axis (in deg)
+  laser_pol = 180 			# p-polarization, can be 0 or 180
+  pulse_length = 30 			# FWHM Intensity duration (in fs)
+  laser_delay = 40 			# Delay before bringing laser onto grid (in fs)
+
+  # Data Dump Intervals
+  #------------------------------------------------------------------------------------------
+  FMovie_interval = 1 			# Time interval b/w Movie dumps (in fs)
+  Fields_interval = 10
+  SMovie_interval = 10
+  PMovie_interval = 1
+
+  Restart_interval = 50			# Time interval b/w Restart dumps (in fs)
+end:constant
+
+# DO NOT TOUCH
+# Modified from .\epoch2d\laser_focus.deck
+begin:constant
+  theta = incident_angle*pi/180 	# Convert to radians
+  r = sqrt(((x-x_min)*sin(theta) + y*cos(theta))^2 + z^2)
+					# Radial distance from focus (in um)
+
+  # These two set the beam focus
+  w_0 = laser_spot*micron 		# Beam waist size
+  x_spot = 1*micron			# Distance from x_min to spot
+
+  # These are the parameters calculated for driving the laser
+  # These should not need to be modified
+  x_R = pi*w_0^2/lambda0 		# Rayleigh range
+  RC = x_spot*(1.0 + (x_R/x_spot)^2) 	# Radius of curvature on x_min
+  w_bnd = w_0*sqrt(1.0+(x_spot/x_R)^2) 	# Spot size at x_min
+  gouy = atan(x_spot/x_R) 		# Gouy phase shift at x_min
+end:constant
+
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+# Define boundary parameters.
+begin:boundaries
+  bc_x_min = simple_laser
+  bc_x_max = simple_outflow
+  bc_y_min = simple_outflow
+  bc_y_max = simple_outflow
+  bc_z_min = simple_outflow
+  bc_z_max = simple_outflow
+end:boundaries
+
+# Laser entering x_min boundary
+# EDIT LASER PROPERTIES IN CONSTANTS SECTION
+begin:laser
+  boundary = x_min
+  amp = E0		
+  lambda = lambda0 * cos(theta)			# ASK ABOUT THIS
+  polarisation = laser_pol
+
+  phase = 2.0*pi/(cos(theta)*lambda0)*r^2/(2.0 * RC) - gouy - 2.0*pi*y*tan(theta)/lambda0			
+
+  # Spatial Profile
+  profile = gauss(r, 0.0, w_bnd)
+
+  # Temporal profile
+  # Pulse length should be the FWHM of the intensity, not std deviation.
+  t_profile = if((laser_delay - pulse_length lt time/femto) and (time/femto lt laser_delay + pulse_length), cos(pi*(time/femto - laser_delay)/(2*pulse_length)), 0)
+
+end:laser
+
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+# Add particles to the grid
+begin:species
+  name = Electron
+  nparticles_per_cell = n_elec_per_cell
+
+  charge = -1.0
+  mass = 1.0
+  temperature_ev = elec_temp
+  drift_px = 0.0
+  drift_py = 0.0
+  drift_pz = 0.0
+
+  number_density = './ElecDens.dat'
+end:species
+
+begin:species
+  name = Proton
+  nparticles_per_cell = n_prot_per_cell
+
+  charge = 1.0
+  mass = 1836.0
+  temperature_ev = prot_temp
+  drift_px = 0.0
+  drift_py = 0.0
+  drift_pz = 0.0
+
+  number_density = './ProtDens.dat'
+end:species
+
+begin:species
+  name = Carbon
+  nparticles_per_cell = n_carb_per_cell
+
+  charge = 6.0
+  mass = 21895.0
+  temperature_ev = carb_temp
+  drift_px = 0.0
+  drift_py = 0.0
+  drift_pz = 0.0
+
+  number_density = './CarbDens.dat'
+end:species
+
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+# Configure the data dumps.
+begin:output_global
+  force_final_to_be_restartable = F
+end:output_global
+
+# Dump fields over the entire grid
+begin:output
+  name = Fields
+  file_prefix = fields_
+  restartable = F
+  dump_first = F
+  dt_snapshot = Fields_interval * femto
+
+  # Properties on grid
+  grid = always 
+  ex = single + always
+  ey = single + always
+  ez = single + always
+  bx = single + always
+  by = single + always
+  bz = single + always
+
+end:output
+
+# Define the subsets each plane for FMovie dump
+begin:subset
+  name = XY_plane
+  z_min = -dz/2
+  z_max = dz/2
+  include_species = Electron 
+  include_species = Proton
+  include_species = Carbon
+end:subset
+
+begin:subset
+  name = YZ_plane
+  x_min = -dx/2
+  x_max = dx/2
+  include_species = Electron 
+  include_species = Proton
+  include_species = Carbon
+end:subset
+
+begin:subset
+  name = XZ_plane
+  y_min = -dy/2
+  y_max = dy/2
+  include_species = Electron 
+  include_species = Proton
+  include_species = Carbon
+end:subset
+
+begin:subset
+  name = X_neg5um
+  x_min = -5*micron - dx/2
+  x_max = -5*micron + dx/2
+  include_species = Electron 
+  include_species = Proton
+  include_species = Carbon
+end:subset
+
+begin:subset
+  name = X_5um
+  x_min = 5*micron - dx/2
+  x_max = 5*micron + dx-2
+  include_species = Electron 
+  include_species = Proton
+  include_species = Carbon
+end:subset
+
+# Dump data that would be included in LSP 'movies'
+begin:output
+  name = FMovie
+  file_prefix = fmovie_
+  restartable = F
+  dump_first = T
+  dt_snapshot = FMovie_interval * femto
+
+  # Properties on grid
+  grid = XY_plane + YZ_plane + XZ_plane 
+  ex = single + XY_plane + YZ_plane + XZ_plane
+  ey = single + XY_plane + YZ_plane + XZ_plane
+  ez = single + XY_plane + YZ_plane + XZ_plane
+  bx = single + XY_plane + YZ_plane + XZ_plane
+  by = single + XY_plane + YZ_plane + XZ_plane
+  bz = single + XY_plane + YZ_plane + XZ_plane
+end:output
+
+begin:output
+  name = SMovie
+  file_prefix = smovie_
+  restartable = F
+  dump_first = T
+  dt_snapshot = SMovie_interval * femto
+
+  # Properties on grid
+  grid = XY_plane
+  number_density = species + single + always
+  ekbar = species +  single + always 
+  temperature = species +  single + always
+
+end:output
+
+# Define the subsets for PMovie dumps.
+begin:subset
+  name = ElectronPMovie
+  include_species = Electron
+  persist_start_time = 0
+  random_fraction = 0.05
+end:subset
+
+begin:subset
+  name = ProtonPMovie
+  include_species = Proton
+  persist_start_time = 0
+  random_fraction = 0.05
+end:subset
+
+begin:subset
+  name = CarbonPMovie
+  include_species = Carbon
+  persist_start_time = 0
+  random_fraction = 0.01
+end:subset
+
+begin:subset
+  name = HighEnergyTNSAProtons
+  include_species = Proton
+  px_min = 3.27e-20
+  weight_min = 20000
+  random_fraction = 1
+end:subset
+
+begin:output
+  name = PMovie
+  file_prefix = pmovie_
+  restartable = F
+  dump_first = T
+  dt_snapshot = PMovie_interval * femto
+
+  #Particle properties
+  id = ElectronPMovie + ProtonPMovie + CarbonPMovie + HighEnergyTNSAProtons
+  weight = single + ElectronPMovie + ProtonPMovie + CarbonPMovie + HighEnergyTNSAProtons
+  particle_grid = single + ElectronPMovie + ProtonPMovie + CarbonPMovie + HighEnergyTNSAProtons
+  vx = single + ElectronPMovie + ProtonPMovie + CarbonPMovie + HighEnergyTNSAProtons
+  vy = single + ElectronPMovie + ProtonPMovie + CarbonPMovie + HighEnergyTNSAProtons
+  vz = single + ElectronPMovie + ProtonPMovie + CarbonPMovie + HighEnergyTNSAProtons
+
+end:output
+
+# Restart dumps
+begin:output
+  name = Restart
+  file_prefix = restart
+  restartable = T
+  t_start = (Restart_interval - 1)*femto
+
+  dt_snapshot = Restart_interval * femto
+  dump_cycle = 1
+end:output
+
+
+

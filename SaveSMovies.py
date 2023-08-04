@@ -1,4 +1,5 @@
 #
+from xxlimited import Str
 import sdf_helper as sh
 import numpy as np
 import os
@@ -14,6 +15,7 @@ def save_scalar_frames(
     plane: Plane = Plane.XY,
     out_folder: str = None,
     save_grid: bool = False,
+    prefix: str = "smovie"
 ):
     """Save scalar movie as numpy array
 
@@ -29,15 +31,13 @@ def save_scalar_frames(
     Returns
         Optional[np.ndarray]: scalar movie data if out_folder is None
     """
-    # file prefix for scalar moview
-    prefix = "smovie"
     start = frame_slice.start if frame_slice.start is not None else 0
     step = frame_slice.step if frame_slice.step is not None else 1
     num_files = len([f for f in os.listdir(inp_folder) if f.startswith(prefix)])
     stop = frame_slice.stop if frame_slice.stop is not None else num_files
     frames = np.arange(start, stop, step)
     out_file_name = (
-        f"{species.value}_{scalar_field.value}_{prefix}_{plane.value}_{start}_{stop}_{step}.npy"
+        f"{species.value}_{scalar_field.value}_{plane.value}.npy"
     )
 
     # Load grid
@@ -75,6 +75,10 @@ def save_scalar_frames(
 if __name__ == "__main__":
     from configs.config import *
 
+    os.makedirs(raw_data_folder, exist_ok=True)
+    os.makedirs(processed_data_folder, exist_ok=True)
+    os.makedirs(media_folder, exist_ok=True)
+
     for species in Species:
         for plane in (Plane.XY, Plane.YZ):
             for field in (Scalar.NUMBER_DENSITY, Scalar.TEMPERATURE):
@@ -85,5 +89,5 @@ if __name__ == "__main__":
                     species=species,
                     out_folder=raw_data_folder,
                     plane=plane,
-                    save_grid=False,
+                    save_grid=True,
                 )
