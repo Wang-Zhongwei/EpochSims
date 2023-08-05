@@ -4,6 +4,7 @@
 #SBATCH --job-name=WriteDensity
 #SBATCH --account=PAS0035
 #PBS -m abe
+module load miniconda3/23.3.1-py310 
 conda activate general
 python /users/PAS2137/wang15032/EpochSims/WriteDensity.py > /users/PAS2137/wang15032/EpochSims/logs/WriteDensity.out
     

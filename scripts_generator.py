@@ -45,6 +45,7 @@ cp $input_dir_path/ProtDens.dat $output_dir_path/ProtDens.dat
 cp $input_dir_path/CarbDens.dat $output_dir_path/CarbDens.dat
 cd $output_dir_path
 
+module load mvapich2/2.3.3
 mpiexec -n $num_procs $epoch_bin_path $output_dir_path/$deck_file >$output_dir_path/log.txt
     """
 
@@ -65,6 +66,7 @@ def generate_analysis_script(movie_type):
 #SBATCH --job-name=Save{movie_type}Movies
 #SBATCH --account={config.ACCOUNT_NUMBER}
 #PBS -m abe
+module load miniconda3/23.3.1-py310 
 conda activate general
 python {config.PROJECT_BASE}/Save{movie_type}Movies.py > {config.LOG_BASE}/Save{movie_type}Movies.out
     """
@@ -80,6 +82,7 @@ def generate_write_density_script():
 #SBATCH --job-name=WriteDensity
 #SBATCH --account={config.ACCOUNT_NUMBER}
 #PBS -m abe
+module load miniconda3/23.3.1-py310 
 conda activate general
 python {config.PROJECT_BASE}/WriteDensity.py > {config.LOG_BASE}/WriteDensity.out
     """

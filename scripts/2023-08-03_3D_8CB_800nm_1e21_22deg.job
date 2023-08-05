@@ -26,5 +26,6 @@ cp $input_dir_path/ProtDens.dat $output_dir_path/ProtDens.dat
 cp $input_dir_path/CarbDens.dat $output_dir_path/CarbDens.dat
 cd $output_dir_path
 
+module load mvapich2/2.3.3
 mpiexec -n $num_procs $epoch_bin_path $output_dir_path/$deck_file >$output_dir_path/log.txt
     
