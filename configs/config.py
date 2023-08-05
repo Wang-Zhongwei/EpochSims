@@ -1,8 +1,8 @@
-from .base_config import *
 import os
+from .base_config import *
 
 # CHANGE THIS TO NEW EXPERIMENT NAME
-experiment_name = "2023-07-28_3D_8CB_800nm_1e21_22deg"
+experiment_name = "2023-08-03_3D_8CB_800nm_1e21_22deg"
 deck_name = 'input'
 
 # RUNNING TIME

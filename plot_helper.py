@@ -1,4 +1,3 @@
-from ftplib import FTP_TLS
 from matplotlib import scale
 import numpy as np
 import matplotlib.pyplot as plt
@@ -69,7 +68,7 @@ if __name__ == "__main__":
     ext = "mp4"  # 'gif' or 'mp4'
     if ext == "gif":
         fps = 10
-    elif ext == "mp4":
+    elif ext == "mp4": # need to have ffmpeg installed
         fps = 10
 
     grid = np.load(os.path.join(raw_data_folder, "grid.npy"), allow_pickle=True)
@@ -118,4 +117,4 @@ if __name__ == "__main__":
                     file_name = f"{species.value}_{field.value.split('_')[-1]}{'_log' if is_log_scale else ''}_{plane.value}.{ext}".lower()
 
                     ani.save(os.path.join(media_folder, f"{file_name}"), fps=fps, dpi=300)
-                    print(f"Saved {file_name}")  # TODO: unknown file extension mp4 is that related to ffmpeg? 
+                    print(f"Saved {file_name}") 

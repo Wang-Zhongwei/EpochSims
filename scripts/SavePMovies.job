@@ -1,0 +1,9 @@
+#!/bin/bash
+#SBATCH --time=00:30:00
+#SBATCH --nodes=1 --ntasks-per-node=32
+#SBATCH --job-name=SavePMovies
+#SBATCH --account=PAS0035
+#PBS -m abe
+conda activate general
+python /users/PAS2137/wang15032/EpochSims/SavePMovies.py > /users/PAS2137/wang15032/EpochSims/logs/SavePMovies.out
+    
