@@ -66,9 +66,8 @@ def generate_analysis_script(movie_type):
 #SBATCH --job-name=Save{movie_type}Movies
 #SBATCH --account={config.ACCOUNT_NUMBER}
 #PBS -m abe
-module load miniconda3/23.3.1-py310 
-conda activate general
-python {config.PROJECT_BASE}/Save{movie_type}Movies.py > {config.LOG_BASE}/Save{movie_type}Movies.out
+# TODO: add interpreter options
+~/.conda/envs/general/bin/python {config.PROJECT_BASE}/Save{movie_type}Movies.py > {config.LOG_BASE}/Save{movie_type}Movies.out
     """
     file_name = f"Save{movie_type}Movies.job"
     with open(os.path.join(config.SCRIPT_BASE, f"{file_name}"), "w") as f:
@@ -82,9 +81,8 @@ def generate_write_density_script():
 #SBATCH --job-name=WriteDensity
 #SBATCH --account={config.ACCOUNT_NUMBER}
 #PBS -m abe
-module load miniconda3/23.3.1-py310 
-conda activate general
-python {config.PROJECT_BASE}/WriteDensity.py > {config.LOG_BASE}/WriteDensity.out
+
+~/.conda/envs/general/bin/python {config.PROJECT_BASE}/WriteDensity.py > {config.LOG_BASE}/WriteDensity.out
     """
     file_name = "WriteDensity3D.job"
     with open(os.path.join(config.SCRIPT_BASE, f"{file_name}"), "w") as f:
@@ -97,7 +95,7 @@ def generate_workflow_script():
 simulation_script="{config.SCRIPT_BASE}/{job_file}"
 saveSMovies_script="{config.SCRIPT_BASE}/SaveSMovies.job"
 saveFMovies_script="{config.SCRIPT_BASE}/SaveFMovies.job"
-savePMoview_script="{config.SCRIPT_BASE}/SavePMovies.job"
+savePMovies_script="{config.SCRIPT_BASE}/SavePMovies.job"
 
 # Submit the simulation job and capture the job id
 simulation_job_id=$(sbatch --parsable "$simulation_script")

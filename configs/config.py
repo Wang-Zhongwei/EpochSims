@@ -6,7 +6,7 @@ experiment_name = "2023-08-03_3D_8CB_800nm_1e21_22deg"
 deck_name = 'input'
 
 # RUNNING TIME
-hours = 18
+hours = 12
 minutes = 0
 seconds = 0
 

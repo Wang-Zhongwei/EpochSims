@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=18:0:0
+#SBATCH --time=12:0:0
 #SBATCH --nodes=24 --ntasks-per-node=40
 #SBATCH --job-name=2023-08-03_3D_8CB_800nm_1e21_22deg
 #SBATCH --account=PAS0035

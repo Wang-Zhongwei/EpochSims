@@ -4,7 +4,6 @@
 #SBATCH --job-name=SavePMovies
 #SBATCH --account=PAS0035
 #PBS -m abe
-module load miniconda3/23.3.1-py310 
-conda activate general
-python /users/PAS2137/wang15032/EpochSims/SavePMovies.py > /users/PAS2137/wang15032/EpochSims/logs/SavePMovies.out
+
+~/.conda/envs/general/bin/python /users/PAS2137/wang15032/EpochSims/SavePMovies.py > /users/PAS2137/wang15032/EpochSims/logs/SavePMovies.out
     

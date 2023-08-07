@@ -1,0 +1,8 @@
+#!/bin/bash
+#SBATCH --time=00:30:00
+#SBATCH --nodes=1 --ntasks-per-node=32
+#SBATCH --job-name=Plot
+#SBATCH --account=PAS0035
+#PBS -m abe
+
+~/.conda/envs/general/bin/python /users/PAS2137/wang15032/EpochSims/plot_helper.py > /users/PAS2137/wang15032/EpochSims/logs/plot_helper.out
