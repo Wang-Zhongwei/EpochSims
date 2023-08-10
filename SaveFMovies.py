@@ -10,7 +10,7 @@ def save_vector_frames(
     vector_field: Vector = Vector.Ey,
     plane: Plane = Plane.XY,
     out_folder: str = None,
-    prefix: str = "fmovie"
+    prefix: str = "fmovie",
 ):
     start = frame_slice.start if frame_slice.start is not None else 0
     step = frame_slice.step if frame_slice.step is not None else 1
@@ -49,9 +49,7 @@ def save_vector_frames(
 if __name__ == "__main__":
     from configs.config import *
 
-    os.makedirs(raw_data_folder, exist_ok=True)
-    os.makedirs(processed_data_folder, exist_ok=True)
-    os.makedirs(media_folder, exist_ok=True)
+    os.makedirs(experiment_folder, exist_ok=True)
 
     # save vector movies
     for vector in (Vector.Ex, Vector.Ey, Vector.Ez, Vector.Bx, Vector.By, Vector.Bz):

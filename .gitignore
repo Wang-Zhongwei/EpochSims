@@ -5,9 +5,7 @@
 *.dat
 *test*
 *.log
-data/media/*
-data/processed/*
-data/raw/*
+data/*
 temp
 *.gif 
 *.mp4

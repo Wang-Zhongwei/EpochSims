@@ -1,4 +1,3 @@
-from matplotlib import scale
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -68,7 +67,7 @@ if __name__ == "__main__":
     ext = "mp4"  # 'gif' or 'mp4'
     if ext == "gif":
         fps = 10
-    elif ext == "mp4": # need to have ffmpeg installed
+    elif ext == "mp4":  # need to have ffmpeg installed
         fps = 10
 
     grid = np.load(os.path.join(raw_data_folder, "grid.npy"), allow_pickle=True)
@@ -92,15 +91,16 @@ if __name__ == "__main__":
                     ),
                     allow_pickle=True,
                 )
-                cmap = "viridis"
                 if field == Scalar.NUMBER_DENSITY:
                     scale_reduced = 0.5
+                    cmap = "viridis"
                 elif field == Scalar.TEMPERATURE:
                     scale_reduced = 1
                     cmap = "jet"
-                    quantity += 1
 
                 for is_log_scale in (True, False):
+                    if is_log_scale:
+                        quantity += 1  # to avoid log(0)
                     ani, ax = animate_field(
                         quantity,
                         extent,
@@ -110,11 +110,12 @@ if __name__ == "__main__":
                         log_scale=is_log_scale,
                         cmap=cmap,
                     )
-                    ax.set_title(field.value)
+                    title = f"{species.value}_{field.value.split('_')[-1]}"
+                    ax.set_title(title)
                     ax.set_xlabel(x_label)
                     ax.set_ylabel(y_label)
 
-                    file_name = f"{species.value}_{field.value.split('_')[-1]}{'_log' if is_log_scale else ''}_{plane.value}.{ext}".lower()
+                    file_name = f"{title}{'_log' if is_log_scale else ''}_{plane.value}.{ext}".lower()
 
                     ani.save(os.path.join(media_folder, f"{file_name}"), fps=fps, dpi=300)
-                    print(f"Saved {file_name}") 
+                    print(f"Saved {file_name}")

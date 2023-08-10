@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH --time=20:0:0
+#SBATCH --nodes=24 --ntasks-per-node=40
+#SBATCH --job-name=2023-08-01_3D_8CB_800nm_1e21_22deg
+#SBATCH --account=PAS0035
+#PBS -m abe
+
+experiment_name=2023-08-01_3D_8CB_800nm_1e21_22deg
+deck_file=input.deck
+job_file=2023-08-01_3D_8CB_800nm_1e21_22deg.job
+num_procs=960
+
+epoch_base_path=/users/PAS2137/wang15032/epoch/epoch3d
+epoch_bin_path=$epoch_base_path/bin/epoch3d
+input_dir_path=/users/PAS2137/wang15032/EpochSims/input
+script_dir_path=/users/PAS2137/wang15032/EpochSims/scripts
+output_dir_path=/fs/ess/scratch/PAS2137/wang15032/EpochOutput/$experiment_name
+
+mkdir -p $output_dir_path
+echo -e $output_dir_path >$output_dir_path/USE_DATA_DIRECTORY
+cp $epoch_base_path/Makefile $output_dir_path/Makefile
+cp $script_dir_path/$job_file $output_dir_path/$job_file
+cp $input_dir_path/$deck_file $output_dir_path/input.deck
+cp $input_dir_path/ElecDens.dat $output_dir_path/ElecDens.dat
+cp $input_dir_path/ProtDens.dat $output_dir_path/ProtDens.dat
+cp $input_dir_path/CarbDens.dat $output_dir_path/CarbDens.dat
+cd $output_dir_path
+
+module load mvapich2/2.3.3
+mpiexec -n $num_procs $epoch_bin_path $output_dir_path/$deck_file >$output_dir_path/log.txt
+    

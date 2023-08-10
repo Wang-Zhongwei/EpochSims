@@ -34,6 +34,7 @@ epoch_bin_path=$epoch_base_path/bin/epoch3d
 input_dir_path={config.INPUT_BASE}
 script_dir_path={config.SCRIPT_BASE}
 output_dir_path={config.EPOCH_OUTPUT_BASE}/$experiment_name
+experiment_dir_path={config.experiment_folder}
 
 mkdir -p $output_dir_path
 echo -e $output_dir_path >$output_dir_path/USE_DATA_DIRECTORY
@@ -44,6 +45,9 @@ cp $input_dir_path/ElecDens.dat $output_dir_path/ElecDens.dat
 cp $input_dir_path/ProtDens.dat $output_dir_path/ProtDens.dat
 cp $input_dir_path/CarbDens.dat $output_dir_path/CarbDens.dat
 cd $output_dir_path
+
+mkdir -p $experiment_dir_path
+cp $input_dir_path/$deck_file $experiment_dir_path/input.deck
 
 module load mvapich2/2.3.3
 mpiexec -n $num_procs $epoch_bin_path $output_dir_path/$deck_file >$output_dir_path/log.txt
@@ -66,8 +70,9 @@ def generate_analysis_script(movie_type):
 #SBATCH --job-name=Save{movie_type}Movies
 #SBATCH --account={config.ACCOUNT_NUMBER}
 #PBS -m abe
-# TODO: add interpreter options
-~/.conda/envs/general/bin/python {config.PROJECT_BASE}/Save{movie_type}Movies.py > {config.LOG_BASE}/Save{movie_type}Movies.out
+
+conda activate {config.CONDA_ENV_NAME}
+python {config.PROJECT_BASE}/Save{movie_type}Movies.py > {config.LOG_BASE}/Save{movie_type}Movies.out
     """
     file_name = f"Save{movie_type}Movies.job"
     with open(os.path.join(config.SCRIPT_BASE, f"{file_name}"), "w") as f:
@@ -82,7 +87,8 @@ def generate_write_density_script():
 #SBATCH --account={config.ACCOUNT_NUMBER}
 #PBS -m abe
 
-~/.conda/envs/general/bin/python {config.PROJECT_BASE}/WriteDensity.py > {config.LOG_BASE}/WriteDensity.out
+conda activate {config.CONDA_ENV_NAME}
+python {config.PROJECT_BASE}/WriteDensity.py > {config.LOG_BASE}/WriteDensity.out
     """
     file_name = "WriteDensity3D.job"
     with open(os.path.join(config.SCRIPT_BASE, f"{file_name}"), "w") as f:
@@ -90,21 +96,32 @@ def generate_write_density_script():
 
 
 def generate_workflow_script():
-    script_contents = f"""#!/bin/bash
+    script_contents = """#!/bin/bash
 # Paths to your job scripts
-simulation_script="{config.SCRIPT_BASE}/{job_file}"
-saveSMovies_script="{config.SCRIPT_BASE}/SaveSMovies.job"
-saveFMovies_script="{config.SCRIPT_BASE}/SaveFMovies.job"
-savePMovies_script="{config.SCRIPT_BASE}/SavePMovies.job"
+simulation_script="/users/PAS2137/wang15032/EpochSims/scripts/2023-08-09_3D_8CB_800nm_1e21_22deg.job"
+saveSMovies_script="/users/PAS2137/wang15032/EpochSims/scripts/SaveSMovies.job"
+saveFMovies_script="/users/PAS2137/wang15032/EpochSims/scripts/SaveFMovies.job"
+savePMovies_script="/users/PAS2137/wang15032/EpochSims/scripts/SavePMovies.job"
+plot_script="/users/PAS2137/wang15032/EpochSims/scripts/Plot.job"
 
 # Submit the simulation job and capture the job id
 simulation_job_id=$(sbatch --parsable "$simulation_script")
 
 # Submit the analysis jobs with dependency on the simulation job
-sbatch --dependency=afterok:$simulation_job_id "$saveSMovies_script"
-sbatch --dependency=afterok:$simulation_job_id "$saveFMovies_script"
-sbatch --dependency=afterok:$simulation_job_id "$savePMovies_script"
-    """
+saveSMovies_job_id=$(sbatch --parsable --dependency=afterok:$simulation_job_id "$saveSMovies_script")
+saveFMovies_job_id=$(sbatch --parsable --dependency=afterok:$simulation_job_id "$saveFMovies_script")
+savePMovies_job_id=$(sbatch --parsable --dependency=afterok:$simulation_job_id "$savePMovies_script")
+
+# Submit the plot job with dependency on the analysis jobs
+plot_script_job_id=$(sbatch --parsable --dependency=afterok:$saveSMovies_job_id:$saveFMovies_job_id:$savePMovies_job_id "$plot_script")
+
+echo "All jobs submitted"
+echo "Simulation job ID: $simulation_job_id"
+echo "SaveSMovies job ID: $saveSMovies_job_id"
+echo "SaveFMovies job ID: $saveFMovies_job_id"
+echo "SavePMovies job ID: $savePMovies_job_id"
+echo "Plot job ID: $plot_script_job_id"
+"""
     file_name = "Workflow.sh"
     with open(os.path.join(config.SCRIPT_BASE, f"{file_name}"), "w") as f:
         f.write(script_contents)

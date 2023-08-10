@@ -1,5 +1,3 @@
-#
-from xxlimited import Str
 import sdf_helper as sh
 import numpy as np
 import os
@@ -75,9 +73,7 @@ def save_scalar_frames(
 if __name__ == "__main__":
     from configs.config import *
 
-    os.makedirs(raw_data_folder, exist_ok=True)
-    os.makedirs(processed_data_folder, exist_ok=True)
-    os.makedirs(media_folder, exist_ok=True)
+    os.makedirs(experiment_folder, exist_ok=True)
 
     for species in Species:
         for plane in (Plane.XY, Plane.YZ):

@@ -2,11 +2,11 @@ import os
 from .base_config import *
 
 # CHANGE THIS TO NEW EXPERIMENT NAME
-experiment_name = "2023-08-03_3D_8CB_800nm_1e21_22deg"
-deck_name = 'input'
+experiment_name = "2023-08-09_3D_8CB_800nm_1e21_22deg"
+deck_name = "input"
 
 # RUNNING TIME
-hours = 12
+hours = 15
 minutes = 0
 seconds = 0
 
@@ -16,9 +16,11 @@ ntasks_per_node = 40
 
 # PATHS
 epoch_output_folder = os.path.join(EPOCH_OUTPUT_BASE, experiment_name)
-raw_data_folder = os.path.join(RAW_DATA_BASE, experiment_name)
-processed_data_folder = os.path.join(PROCESSED_DATA_BASE, experiment_name)
-media_folder = os.path.join(MEDIA_BASE, experiment_name)
+experiment_folder = os.path.join(DATA_BASE, experiment_name)
+
+raw_data_folder = os.path.join(experiment_folder, "raw")
+processed_data_folder = os.path.join(experiment_folder, "processed")
+media_folder = os.path.join(experiment_folder, "media")
 
 # NAMES
 leaving_particles_file_name = "leaving_particles.csv"

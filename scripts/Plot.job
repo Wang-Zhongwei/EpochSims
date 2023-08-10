@@ -5,4 +5,5 @@
 #SBATCH --account=PAS0035
 #PBS -m abe
 
-~/.conda/envs/general/bin/python /users/PAS2137/wang15032/EpochSims/plot_helper.py > /users/PAS2137/wang15032/EpochSims/logs/plot_helper.out
+conda activate general
+python /users/PAS2137/wang15032/EpochSims/plot_helper.py > /users/PAS2137/wang15032/EpochSims/logs/plot_helper.out

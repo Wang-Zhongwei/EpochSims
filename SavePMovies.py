@@ -116,9 +116,7 @@ def combine_frames_to_leaving_particles(inp_folder, x_cutoff, out_path=None):
 if __name__ == "__main__":
     from configs.config import *
 
-    os.makedirs(raw_data_folder, exist_ok=True)
-    os.makedirs(processed_data_folder, exist_ok=True)
-    os.makedirs(media_folder, exist_ok=True)
+    os.makedirs(experiment_folder, exist_ok=True)
     
     # TODO: replace 321 with number of frames in simulation
     for i in range(0, 321, 10):

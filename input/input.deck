@@ -52,7 +52,7 @@ begin:constant
   n_elec = 3.274368e29                  # m^-3
   n_prot = 5.60094e28                   # m^-3
   n_carb = 4.52379e28                   # m^-3
-  n_crit = 1.7343954e27 		# m^-3 
+  n_crit = 1.7343954e27 		# m^-3
 
   elec_temp = 10 			# Temperature (in eV)
   prot_temp = 10 			# Temperature (in eV)
@@ -60,7 +60,7 @@ begin:constant
 
   # Laser Parameters
   #------------------------------------------------------------------------------------------
-  E0 = 3.618439e13  			# Electric field amplitude (V/m), equivalent to 1.73811*10^20 W/cm^2
+  E0 = 9.899295e13  			# Electric field amplitude (V/m) at the focus, aka 1.3e21 W/cm^2
   lambda0 = 800e-9 			# Laser wavelength
   laser_spot = 1 			# Laser spotsize radius (in um)
   incident_angle = 22 			# Incident angle w.r.t x_axis (in deg)
@@ -87,7 +87,7 @@ begin:constant
 
   # These two set the beam focus
   w_0 = laser_spot*micron 		# Beam waist size
-  x_spot = 1*micron			# Distance from x_min to spot
+  x_spot = 5*micron			# Distance from x_min to spot
 
   # These are the parameters calculated for driving the laser
   # These should not need to be modified
@@ -113,8 +113,8 @@ end:boundaries
 # EDIT LASER PROPERTIES IN CONSTANTS SECTION
 begin:laser
   boundary = x_min
-  amp = E0		
-  lambda = lambda0 * cos(theta)			# ASK ABOUT THIS
+  amp = E0 * w_0 / w_bnd # amplitude at the laser boundary 
+  lambda = lambda0 * cos(theta)
   polarisation = laser_pol
 
   phase = 2.0*pi/(cos(theta)*lambda0)*r^2/(2.0 * RC) - gouy - 2.0*pi*y*tan(theta)/lambda0			
