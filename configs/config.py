@@ -2,7 +2,7 @@ import os
 from .base_config import *
 
 # CHANGE THIS TO NEW EXPERIMENT NAME
-experiment_name = "2023-08-09_3D_8CB_800nm_1e21_22deg"
+experiment_name = "2023-08-29_convergence_test"
 deck_name = "input"
 
 # RUNNING TIME
@@ -15,7 +15,7 @@ nodes = 24
 ntasks_per_node = 40
 
 # PATHS
-epoch_output_folder = os.path.join(EPOCH_OUTPUT_BASE, experiment_name)
+epoch_output_dir = os.path.join(EPOCH_OUTPUT_BASE, experiment_name)
 experiment_folder = os.path.join(DATA_BASE, experiment_name)
 
 raw_data_folder = os.path.join(experiment_folder, "raw")

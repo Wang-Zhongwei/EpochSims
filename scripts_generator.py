@@ -15,7 +15,6 @@ except AttributeError:
 
 def generate_simulation_script():
     # Prepare deck_name and job_name using experiment_name
-
     # Prepare the contents of the .job script
     script_contents = f"""#!/bin/bash
 #SBATCH --time={config.hours}:{config.minutes}:{config.seconds}
@@ -96,13 +95,13 @@ python {config.PROJECT_BASE}/WriteDensity.py > {config.LOG_BASE}/WriteDensity.ou
 
 
 def generate_workflow_script():
-    script_contents = """#!/bin/bash
+    script_contents = f"""#!/bin/bash
 # Paths to your job scripts
-simulation_script="/users/PAS2137/wang15032/EpochSims/scripts/2023-08-09_3D_8CB_800nm_1e21_22deg.job"
-saveSMovies_script="/users/PAS2137/wang15032/EpochSims/scripts/SaveSMovies.job"
-saveFMovies_script="/users/PAS2137/wang15032/EpochSims/scripts/SaveFMovies.job"
-savePMovies_script="/users/PAS2137/wang15032/EpochSims/scripts/SavePMovies.job"
-plot_script="/users/PAS2137/wang15032/EpochSims/scripts/Plot.job"
+simulation_script="{config.SCRIPT_BASE}/{config.experiment_name}.job"
+saveSMovies_script="{config.SCRIPT_BASE}/SaveSMovies.job"
+saveFMovies_script="{config.SCRIPT_BASE}/SaveFMovies.job"
+savePMovies_script="{config.SCRIPT_BASE}/SavePMovies.job"
+plot_script="{config.SCRIPT_BASE}/Plot.job"
 
 # Submit the simulation job and capture the job id
 simulation_job_id=$(sbatch --parsable "$simulation_script")

@@ -49,11 +49,11 @@ def save_vector_frames(
 if __name__ == "__main__":
     from configs.config import *
 
-    os.makedirs(experiment_folder, exist_ok=True)
+    os.makedirs(raw_data_folder, exist_ok=True)
 
     # save vector movies
     for vector in (Vector.Ex, Vector.Ey, Vector.Ez, Vector.Bx, Vector.By, Vector.Bz):
         for plane in (Plane.XY, Plane.YZ):
             save_vector_frames(
-                epoch_output_folder, slice(None, None, 10), vector, plane, raw_data_folder
+                epoch_output_dir, slice(None, None, 10), vector, plane, raw_data_folder
             )

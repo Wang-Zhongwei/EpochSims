@@ -15,19 +15,19 @@ begin:control
 
 
   # Simulation time:
-  t_end = 320 * femto 		
+  t_end = 400 * femto 		
   dt_multiplier = 0.90 		# Courant Condition
 
   # Define the simulation grid.
   x_min = -10 * micron
   x_max = 10 * micron
-  nx = 1250 			# dx = 16nm
+  nx = 500 			
   y_min = -9*micron
   y_max = 14*micron
-  ny = 767 			# dy = 30nm
+  ny = 500 			
   z_min = -9*micron
   z_max = 9*micron
-  nz = 600 			# dz = 30nm
+  nz = 500 			
 
 end:control
 
@@ -87,7 +87,8 @@ begin:constant
 
   # These two set the beam focus
   w_0 = laser_spot*micron 		# Beam waist size
-  x_spot = 5*micron			# Distance from x_min to spot
+
+  x_spot = -x_min			# Distance from x_min to spot 
 
   # These are the parameters calculated for driving the laser
   # These should not need to be modified

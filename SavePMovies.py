@@ -1,4 +1,5 @@
 import os
+from matplotlib import pyplot as plt
 import numpy as np
 import sdf_helper as sh
 import pandas as pd
@@ -116,11 +117,16 @@ def combine_frames_to_leaving_particles(inp_folder, x_cutoff, out_path=None):
 if __name__ == "__main__":
     from configs.config import *
 
-    os.makedirs(experiment_folder, exist_ok=True)
-    
-    # TODO: replace 321 with number of frames in simulation
-    for i in range(0, 321, 10):
-        inp_path = os.path.join(epoch_output_folder, f"pmovie_{i:04}.sdf")
+    os.makedirs(processed_data_folder, exist_ok=True)
+
+    # Count the number of frames in the simulation
+    num_frames = len(
+        [f for f in os.listdir(epoch_output_dir) if f.startswith("pmovie_") and f.endswith(".sdf")]
+    )
+
+    # Loop over all frames and save the proton species to CSV
+    for i in range(0, num_frames, 10):
+        inp_path = os.path.join(epoch_output_dir, f"pmovie_{i:04}.sdf")
         out_path = os.path.join(raw_data_folder, f"TNSAProton_{i:04}.csv")
         save_species_to_csv(inp_path, Species.PROTON, out_path, E_cutoff_MeV=1, decimation_ratio=1)
         print(f"Saved {out_path}")

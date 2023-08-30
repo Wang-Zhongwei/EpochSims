@@ -13,7 +13,7 @@ def save_scalar_frames(
     plane: Plane = Plane.XY,
     out_folder: str = None,
     save_grid: bool = False,
-    prefix: str = "smovie"
+    prefix: str = "smovie",
 ):
     """Save scalar movie as numpy array
 
@@ -34,9 +34,7 @@ def save_scalar_frames(
     num_files = len([f for f in os.listdir(inp_folder) if f.startswith(prefix)])
     stop = frame_slice.stop if frame_slice.stop is not None else num_files
     frames = np.arange(start, stop, step)
-    out_file_name = (
-        f"{species.value}_{scalar_field.value}_{plane.value}.npy"
-    )
+    out_file_name = f"{species.value}_{scalar_field.value}_{plane.value}.npy"
 
     # Load grid
     grid = sh.getdata(
@@ -73,13 +71,13 @@ def save_scalar_frames(
 if __name__ == "__main__":
     from configs.config import *
 
-    os.makedirs(experiment_folder, exist_ok=True)
+    os.makedirs(raw_data_folder, exist_ok=True)
 
     for species in Species:
         for plane in (Plane.XY, Plane.YZ):
             for field in (Scalar.NUMBER_DENSITY, Scalar.TEMPERATURE):
                 save_scalar_frames(
-                    epoch_output_folder,
+                    epoch_output_dir,
                     slice(None),
                     scalar_field=field,
                     species=species,
