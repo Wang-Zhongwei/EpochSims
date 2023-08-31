@@ -1,6 +1,6 @@
 #!/bin/bash
 # Paths to your job scripts
-simulation_script="/users/PAS2137/wang15032/EpochSims/scripts/2023-08-09_3D_8CB_800nm_1e21_22deg.job"
+simulation_script="/users/PAS2137/wang15032/EpochSims/scripts/2023-08-31_convergence_test.job"
 saveSMovies_script="/users/PAS2137/wang15032/EpochSims/scripts/SaveSMovies.job"
 saveFMovies_script="/users/PAS2137/wang15032/EpochSims/scripts/SaveFMovies.job"
 savePMovies_script="/users/PAS2137/wang15032/EpochSims/scripts/SavePMovies.job"

@@ -24,10 +24,10 @@ begin:control
   nx = 500 			
   y_min = -9*micron
   y_max = 14*micron
-  ny = 500 			
+  ny = 625 			
   z_min = -9*micron
   z_max = 9*micron
-  nz = 500 			
+  nz = 450 			
 
 end:control
 

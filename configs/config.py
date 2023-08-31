@@ -2,11 +2,11 @@ import os
 from .base_config import *
 
 # CHANGE THIS TO NEW EXPERIMENT NAME
-experiment_name = "2023-08-29_convergence_test"
+experiment_name = "2023-08-31_convergence_test"
 deck_name = "input"
 
 # RUNNING TIME
-hours = 15
+hours = 2
 minutes = 0
 seconds = 0
 
