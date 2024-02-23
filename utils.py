@@ -3,6 +3,8 @@ import time
 
 class Species(Enum):
     PROTON = 'Proton'
+    DEUTERON = 'Deuteron'
+    HYDROGEN = 'Hydrogen'
     ELECTRON = 'Electron'
     CARBON = 'Carbon'
 

@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-def half_gaussian_density(x_array: np.ndarray, T: float, x0: float, sigma: float) -> np.ndarray:
+def half_gaussian_density(x_array: np.ndarray, thickness: float, x0: float, sigma: float) -> np.ndarray:
     """Returns a density profile where x <= x0 is expanded as a Gaussian and
     x >= x0 is unexpanded.
     ------------------------------------------------------
@@ -12,8 +12,8 @@ def half_gaussian_density(x_array: np.ndarray, T: float, x0: float, sigma: float
     sigma: float, standard deviation of density profile"""
 
     # Compute the gaussian normalization.
-    assert -T / 2 < x0 < T / 2
-    d = T / 2 + x0
+    assert -thickness / 2 < x0 < thickness / 2
+    d = thickness / 2 + x0
     A = d * np.sqrt(2 / (np.pi * sigma**2))
 
     output = np.empty(len(x_array))
@@ -21,13 +21,13 @@ def half_gaussian_density(x_array: np.ndarray, T: float, x0: float, sigma: float
     for i, x in enumerate(x_array):
         if x <= x0:
             output[i] = A * np.exp(-((x - x0) ** 2) / (2 * sigma**2))
-        elif x0 < x <= T / 2:
+        elif x0 < x <= thickness / 2:
             output[i] = 1
         else:
             output[i] = 0
 
     # Normalize the gaussian region again
-    norm = np.trapz(output, x_array) / T
+    norm = np.trapz(output, x_array) / thickness
     return output / norm
 
 
@@ -80,9 +80,12 @@ if __name__ == "__main__":
     # Get the axis data.
     output_dir = 'input'
 
-    x_array = np.linspace(-10, 10, 500)
-    y_array = np.linspace(-9, 14, 575)
-    z_array = np.linspace(-9, 9, 450)
+    # nx, ny, nz = 1250, 767, 600
+    nx, ny, nz = 500, 575, 450
+
+    x_array = np.linspace(-10, 10, nx)
+    y_array = np.linspace(-9, 14, ny)
+    z_array = np.linspace(-9, 9, nz)
     print(x_array.shape, y_array.shape, z_array.shape)
 
     # No expansion number densitities.
@@ -99,7 +102,7 @@ if __name__ == "__main__":
     wp = np.sqrt(n_elec * q_e**2 / (epsilon_0 * m_e)) * 1e3
     skin_depth = c / wp
 
-    T = 2.4
+    T = 1.
     length = -0.03
     L = 0.505
     density = half_gaussian_density(x_array, T, (-T / 2 - length), L)
