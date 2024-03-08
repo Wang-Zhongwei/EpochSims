@@ -5,12 +5,11 @@ import subprocess
 from configs.base_config import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--experiment-name', type=str)
-parser.add_argument('--deck-name', type=str)
-parser.add_argument('--num-nodes', type=int, default=1)
-parser.add_argument('--ntasks-per-node', type=int, default=1)
-parser.add_argument('--time-limit', type=str, default="00:30:00")
-
+parser.add_argument('-e', '--experiment-name', type=str)
+parser.add_argument('-d', '--deck-name', type=str)
+parser.add_argument('-n', '--num-nodes', type=int, default=1)
+parser.add_argument('-t', '--ntasks-per-node', type=int, default=1)
+parser.add_argument('-l', '--time-limit', type=str, default="00:30:00")
 args = parser.parse_args()
 
 timestamp = datetime.now().strftime("%Y%m%d")
