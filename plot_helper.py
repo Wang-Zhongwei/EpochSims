@@ -1,29 +1,29 @@
-import multiprocessing as mp
 import os
-from typing import Tuple, Union
-
+from typing import Optional, Tuple, Union
+import multiprocessing as mp
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
+import sdf_helper as sh
 import sdf
 from matplotlib.axes import Axes
 from matplotlib.colorbar import Colorbar
-from matplotlib.colors import Normalize
+from matplotlib.colors import LogNorm, Normalize
 
 from utils import Plane, Scalar, Species, Vector
 
 
-def animate(
-    field: np.ndarray,
+def animate_data(
+    data: np.ndarray,
     extent: Tuple[float, float, float, float] = [0, 1, 0, 1],
-    norm: Normalize = None,
+    norm: Normalize = Normalize(),
     cmap="viridis",
     **kwargs,
 ) -> Tuple[animation.FuncAnimation, Axes, Colorbar]:
-    """field animation
+    """animate data over time on a 2D plot
 
     Args:
-        field (np.ndarray): 3D array where the first dimension is assumed to be time
+        data (np.ndarray): 3D array where the first dimension is assumed to be time
         extent (Tuple[float, float, float, float], optional): extent of the 2D plot. Defaults to None.
         norm (Normalize, optional): matplotlib.colors.Normalize. Defaults to [0, 1, 0, 1].
         cmap (str, optional): colormap passed to ax.imshow(). Defaults to "viridis".
@@ -32,12 +32,9 @@ def animate(
     Returns:
         Tuple[animation.FuncAnimation, Axes, Colorbar]: animation, axis, and colorbar
     """
-    if norm is None:
-        norm = Normalize(vmin=np.min(field), vmax=np.max(field))
-
     fig, ax = plt.subplots()
     img = ax.imshow(
-        field[0].T,
+        data[0].T,
         extent=extent,
         origin="lower",
         interpolation="nearest",
@@ -48,11 +45,61 @@ def animate(
 
     # Update function for animation
     def update(i):
-        img.set_array(field[i].T)
+        img.set_array(data[i].T)
 
-    ani = animation.FuncAnimation(fig, update, frames=range(len(field)), **kwargs)
+    ani = animation.FuncAnimation(fig, update, frames=range(len(data)), **kwargs)
 
     return ani, ax, cbar
+
+# This function has to be defined in a global scope to avoid pickling issue with multiprocessing
+def read_frame(
+    input_dir: str,
+    file_prefix: str,
+    frame: int,
+    field: Union[Scalar, Vector],
+    species: Optional[Species] = None,
+):
+    data = sh.getdata(
+        os.path.join(input_dir, f"{file_prefix}_{frame:04d}.sdf"), verbose=False
+    )
+    if species is not None:
+        return data.__getattribute__(f"{field.value}_{species.value}").data
+    else:
+        return data.__getattribute__(f"{field.value}").data
+
+
+def parallel_read_frames_from_dir(
+    input_dir: str,
+    file_prefix: str,
+    field: Union[Scalar, Vector],
+    species: Optional[Species] = None,
+):
+    num_frames = len([f for f in os.listdir(input_dir) if f.startswith(file_prefix)])
+    with mp.Pool(mp.cpu_count()) as pool:
+        frames = pool.starmap(
+            read_frame,
+            [
+                (input_dir, file_prefix, frame, field, species)
+                for frame in range(num_frames)
+            ],
+        )
+    return frames
+
+
+def animate_field(
+    input_dir: str,
+    field: Union[Scalar, Vector],
+    species: Optional[Species] = None,
+    file_prefix: Optional[str] = None,
+    normalization_factor: float = 1.0,
+    **kwargs,
+):  
+    if file_prefix is None:
+        file_prefix = "fmovie" if species is None else "smovie"
+
+    frames = parallel_read_frames_from_dir(input_dir, file_prefix, field, species)
+    data = [frame / normalization_factor for frame in frames]
+    return animate_data(data, **kwargs)
 
 
 def get_phase_space_data(
@@ -146,7 +193,7 @@ def animate_phase_space(inp_dir, out_dir, animation_name, interval, species, **k
         pool.close()
         pool.join()
 
-    ani, ax = animate(dist, [x_min, x_max, v_min, v_max], **kwargs)
+    ani, ax = animate_data(dist, extent=[x_min, x_max, v_min, v_max], **kwargs)
     ax.set_xlabel("Position")
     ax.set_ylabel("Velocity")
     ax.set_title(f"Phase Space Density Plot")
