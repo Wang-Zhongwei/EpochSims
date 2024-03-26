@@ -1,20 +1,23 @@
 import os
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 import multiprocessing as mp
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import ndimage
 import sdf_helper as sh
 import sdf
 from matplotlib.axes import Axes
 from matplotlib.colorbar import Colorbar
-from matplotlib.colors import LogNorm, Normalize
+from matplotlib.colors import Normalize
+import concurrent.futures
 
-from utils import Plane, Scalar, Species, Vector
+from utils import Scalar, Species, Vector
 
 
 def animate_data(
     data: np.ndarray,
+    time_stamps: List[float] = None,
     extent: Tuple[float, float, float, float] = [0, 1, 0, 1],
     norm: Normalize = Normalize(),
     cmap="viridis",
@@ -24,6 +27,7 @@ def animate_data(
 
     Args:
         data (np.ndarray): 3D array where the first dimension is assumed to be time
+        time_stamps (List[float], optional): time stamps of each instant of data. Defaults to None.
         extent (Tuple[float, float, float, float], optional): extent of the 2D plot. Defaults to None.
         norm (Normalize, optional): matplotlib.colors.Normalize. Defaults to [0, 1, 0, 1].
         cmap (str, optional): colormap passed to ax.imshow(). Defaults to "viridis".
@@ -43,47 +47,51 @@ def animate_data(
     )
     cbar = fig.colorbar(img)
 
+    time_text = ax.text(
+        0.05,
+        0.95,
+        "",
+        transform=ax.transAxes,
+        fontsize=12,
+        color="white",
+        backgroundcolor="black",
+    )
+
     # Update function for animation
     def update(i):
         img.set_array(data[i].T)
+
+        if time_stamps is not None:
+            time_text.set_text(f"t = {time_stamps[i]:.2e} s")
+        else:
+            time_text.set_text(f"Frame: {i}")
 
     ani = animation.FuncAnimation(fig, update, frames=range(len(data)), **kwargs)
 
     return ani, ax, cbar
 
-# This function has to be defined in a global scope to avoid pickling issue with multiprocessing
-def read_frame(
-    input_dir: str,
-    file_prefix: str,
-    frame: int,
+
+def read_quantity_from_sdf(
+    sdf: sdf.BlockList,
     field: Union[Scalar, Vector],
     species: Optional[Species] = None,
-):
-    data = sh.getdata(
-        os.path.join(input_dir, f"{file_prefix}_{frame:04d}.sdf"), verbose=False
-    )
+) -> sdf.BlockList:
     if species is not None:
-        return data.__getattribute__(f"{field.value}_{species.value}").data
+        if species == Species.ALL:
+            return sdf.__getattribute__(f"{field.value}")
+        else:
+            return sdf.__getattribute__(f"{field.value}_{species.value}")
     else:
-        return data.__getattribute__(f"{field.value}").data
+        return sdf.__getattribute__(f"{field.value}")
 
 
-def parallel_read_frames_from_dir(
-    input_dir: str,
-    file_prefix: str,
-    field: Union[Scalar, Vector],
-    species: Optional[Species] = None,
-):
-    num_frames = len([f for f in os.listdir(input_dir) if f.startswith(file_prefix)])
-    with mp.Pool(mp.cpu_count()) as pool:
-        frames = pool.starmap(
-            read_frame,
-            [
-                (input_dir, file_prefix, frame, field, species)
-                for frame in range(num_frames)
-            ],
-        )
-    return frames
+def transform_func(
+    data: np.ndarray, normalization_factor: float = 1.0, smoothing_sigma: float = 0.0
+) -> np.ndarray:
+    data /= normalization_factor
+    if smoothing_sigma > 0:
+        data = ndimage.gaussian_filter(data, sigma=smoothing_sigma)
+    return data
 
 
 def animate_field(
@@ -92,14 +100,43 @@ def animate_field(
     species: Optional[Species] = None,
     file_prefix: Optional[str] = None,
     normalization_factor: float = 1.0,
+    smoothing_sigma: float = 0.0,
     **kwargs,
-):  
+) -> Tuple[animation.FuncAnimation, Axes, Colorbar]:
     if file_prefix is None:
         file_prefix = "fmovie" if species is None else "smovie"
 
-    frames = parallel_read_frames_from_dir(input_dir, file_prefix, field, species)
-    data = [frame / normalization_factor for frame in frames]
-    return animate_data(data, **kwargs)
+    num_frames = len([f for f in os.listdir(input_dir) if f.startswith(file_prefix)])
+
+    # load data
+    data, time_stamps = [], []
+    for i in range(num_frames):
+        sdf = sh.getdata(
+            os.path.join(input_dir, f"{file_prefix}_{i:04d}.sdf"), verbose=False
+        )
+        quantity = read_quantity_from_sdf(sdf, field, species)
+        data.append(quantity.data)
+        time_stamps.append(sdf.Header["time"])
+
+    # get domain extent
+    grid = quantity.grid.data
+    extent = []
+    for i in range(len(grid)):
+        extent.append(grid[i][0])
+        extent.append(grid[i][-1])
+
+    # normalize and smooth data
+    with mp.Pool(mp.cpu_count()) as pool:
+        data = pool.starmap(
+            transform_func, [(d, normalization_factor, smoothing_sigma) for d in data]
+        )
+
+    return animate_data(
+        data,
+        time_stamps=time_stamps,
+        extent=extent,
+        **kwargs,
+    )
 
 
 def get_phase_space_data(

@@ -11,6 +11,7 @@ class Species(Enum):
     ELECTRON = 'Electron'
     PROTON = 'Proton'
     DEUTERON = 'Deuteron'
+    HYDROGEN = 'Hydrogen'
     CARBON = 'Carbon'
     ALL = ''
 
