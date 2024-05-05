@@ -1,6 +1,12 @@
+import logging
+import time
 from enum import Enum
 from math import cos, pi
-import time
+
+import numpy as np
+from scipy.constants import elementary_charge, epsilon_0, m_e, speed_of_light
+
+logging.basicConfig(level=logging.INFO)
 
 class Plane(Enum):
     XY = 'XY'
@@ -37,7 +43,9 @@ def timer(func):
         start_time = time.time()  # Start time before function execution
         result = func(*args, **kwargs)  # Function execution
         end_time = time.time()  # End time after function execution
-        print(f"Function {func.__name__} took {end_time - start_time:.3f} seconds to execute.")
+
+        logging.info(f"Function {func.__name__} took {end_time - start_time:.3f} seconds to execute.")
+
         return result
 
     return wrapper
@@ -88,3 +96,21 @@ def calc_z(w_0, w, lambda_0):
     """    
     x_R = pi * w_0**2 / lambda_0
     return x_R * ((w / w_0)**2 - 1)**0.5
+
+def calc_critical_density(lambda_0: float):
+    """Calculate the critical density of a plasma
+
+    Args:
+        lambda_0 (float): wavelength of laser in um
+    
+    Returns:
+        float: critical density in m^-3
+    """
+    lambda_0 *= 1e-6 # convert to m
+    omega_0 = 2 * pi * speed_of_light / lambda_0
+    return omega_0 ** 2 * m_e * epsilon_0 / elementary_charge ** 2
+
+def calc_plasma_frequency(n_e: float):
+    """Calculate the plasma frequency of a plasma
+    """
+    return np.sqrt(n_e * elementary_charge ** 2 / (m_e * epsilon_0))

@@ -6,17 +6,21 @@ from configs.base_config import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-e', '--experiment-name', type=str)
-parser.add_argument('-d', '--deck-name', type=str)
+parser.add_argument('-d', '--dimension', type=int, default=2)
+parser.add_argument('-dn', '--deck-name', type=str)
 parser.add_argument('-n', '--num-nodes', type=int, default=1)
 parser.add_argument('-t', '--ntasks-per-node', type=int, default=1)
 parser.add_argument('-l', '--time-limit', type=str, default="00:30:00")
 args = parser.parse_args()
 
 timestamp = datetime.now().strftime("%Y%m%d")
-job_name = f"{timestamp}_{args.experiment_name}_{args.deck_name}"
-ouput_dir_path = os.path.join(OUTPUT_BASE_PATH, job_name)
-subprocess.run(f"conda activate {CONDA_ENV_NAME}", shell=True)
+job_name = f"{args.deck_name}_{timestamp}"
+
+ouput_dir_path = os.path.join(OUTPUT_BASE_PATH, args.experiment_name, job_name)
+analysis_dir_path = os.path.join(ANALYSIS_BASE_PATH, args.experiment_name, job_name)
+
 os.makedirs(ouput_dir_path, exist_ok=True)
+os.makedirs(analysis_dir_path, exist_ok=True)
 
 # load template.sh
 with open("template.sh", "r") as f:
@@ -31,7 +35,10 @@ with open("template.sh", "r") as f:
     template = template.replace("${DECK_NAME}", args.deck_name)
     template = template.replace("${JOB_NAME}", job_name)
     template = template.replace("${OUTPUT_DIR_PATH}", ouput_dir_path)
-    template = template.replace("${EXECUTABLE_PATH}", EXECUTABLE_PATH)
+    if args.dimension == 3:
+        template = template.replace("${EXECUTABLE_PATH}", EXECUTABLE_PATH_3D)
+    else:
+        template = template.replace("${EXECUTABLE_PATH}", EXECUTABLE_PATH_2D)
 
     # save template to output_dir
     with open(f"{ouput_dir_path}/{job_name}.sh", "w") as f:

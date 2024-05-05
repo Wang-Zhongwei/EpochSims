@@ -1,20 +1,20 @@
+import multiprocessing as mp
 import os
 from typing import List, Optional, Tuple, Union
-import multiprocessing as mp
+
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import ndimage
-import sdf_helper as sh
 import sdf
+import sdf_helper as sh
 from matplotlib.axes import Axes
 from matplotlib.colorbar import Colorbar
 from matplotlib.colors import Normalize
-import concurrent.futures
+from scipy import ndimage
 
-from utils import Scalar, Species, Vector
+from utils import Scalar, Species, Vector, timer
 
-
+@timer
 def animate_data(
     data: np.ndarray,
     time_stamps: List[float] = None,
@@ -69,7 +69,6 @@ def animate_data(
     ani = animation.FuncAnimation(fig, update, frames=range(len(data)), **kwargs)
 
     return ani, ax, cbar
-
 
 def read_quantity_from_sdf(
     sdf: sdf.BlockList,
@@ -235,75 +234,3 @@ def animate_phase_space(inp_dir, out_dir, animation_name, interval, species, **k
     ax.set_ylabel("Velocity")
     ax.set_title(f"Phase Space Density Plot")
     ani.save(os.path.join(out_dir, animation_name), **kwargs)
-
-
-if __name__ == "__main__":
-    # load grid data: fix save grid
-    from configs.config import *
-
-    os.makedirs(media_folder, exist_ok=True)
-
-    ext = "mp4"  # 'gif' or 'mp4'
-    if ext == "gif":
-        fps = 10
-    elif ext == "mp4":  # need to have ffmpeg installed
-        fps = 10
-
-    # grid = np.load(os.path.join(raw_data_folder, "grid.npy"), allow_pickle=True)
-    # x_array, y_array, z_array = grid
-
-    for species in (Species.PROTON, Species.ELECTRON, Species.CARBON):
-        animate_phase_space(
-            lustre_data_path,
-            media_folder,
-            f"{species.value}_phase_space.mp4",
-            5,
-            species=species,
-            fps=fps,
-            dpi=300,
-            blit=True,
-        )
-        # for plane in (Plane.XY, Plane.YZ):
-        #     if plane == Plane.XY:
-        #         extent = [x_array[0], x_array[-1], y_array[0], y_array[-1]]
-        #         x_label = "x"
-        #         y_label = "y"
-        #     elif plane == Plane.YZ:
-        #         extent = [y_array[0], y_array[-1], z_array[0], z_array[-1]]
-        #         x_label = "y"
-        #         y_label = "z"
-
-        #     for field in (Scalar.NUMBER_DENSITY, Scalar.TEMPERATURE):
-        #         quantity = np.load(
-        #             os.path.join(
-        #                 raw_data_folder, f"{species.value}_{field.value}_{plane.value}.npy"
-        #             ),
-        #             allow_pickle=True,
-        #         )
-        #         if field == Scalar.NUMBER_DENSITY:
-        #             z_scale = 0.5
-        #             cmap = "viridis"
-        #         elif field == Scalar.TEMPERATURE:
-        #             z_scale = 1
-        #             cmap = "jet"
-
-        #         for is_log_scale in (True, False):
-        #             if is_log_scale:
-        #                 quantity += 1  # to avoid log(0)
-        #             ani, ax = animate_field(
-        #                 quantity,
-        #                 extent,
-        #                 vmin=None,
-        #                 vmax=None,
-        #                 z_scale=z_scale,
-        #                 log_scale=is_log_scale,
-        #                 cmap=cmap,
-        #             )
-        #             ax.set_title(f"{species.value} {field.value.split('_')[-1]}")
-        #             ax.set_xlabel(x_label)
-        #             ax.set_ylabel(y_label)
-
-        #             file_name = f"{species.value}_{field.value.split('_')[-1]}{'_log' if is_log_scale else ''}_{plane.value}.{ext}".lower()
-
-        #             ani.save(os.path.join(media_folder, f"{file_name}"), fps=fps, dpi=300)
-        #             print(f"Saved {file_name}")
