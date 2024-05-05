@@ -1,0 +1,20 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug show_content.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "show_content.py",
+            "args": [
+                "/fs/scratch/PAS0035/wang15032/EpochOutput/3D_scaling/reduce_storage_20240504/smovie_0000.sdf",
+                "--var_name",
+                "Derived_Charge_Density"
+            ],
+            "console": "integratedTerminal"
+        }
+    ]
+}
