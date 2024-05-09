@@ -48,6 +48,7 @@ var_names = args.var_names
 plane = Plane[args.subset]
 
 # load env.py from analysis_data_dir
+# todo: automatically create env.py according to indput.deck
 env_path = os.path.join(input_dir, "env.py")
 exec(open(env_path).read())
 
@@ -58,6 +59,7 @@ var_params = {
         "norm": SymLogNorm(linthresh=1e-2, linscale=1),
         "cmap": "bwr",
         "normalization_factor": E0,
+        "smoothing_sigma": 0.0,
         "cbar_label": r"$\frac{eE_x}{m_e c\omega}$",
     },
     "Electric_Field_Ey": {
@@ -65,6 +67,7 @@ var_params = {
         "norm": SymLogNorm(linthresh=1e-2, linscale=1),
         "cmap": "bwr",
         "normalization_factor": E0,
+        "smoothing_sigma": 0.0,
         "cbar_label": r"$\frac{eE_y}{m_e c\omega}$",
     },
     "Electric_Field_Ez": {
@@ -72,6 +75,7 @@ var_params = {
         "norm": SymLogNorm(linthresh=1e-2, linscale=1),
         "cmap": "bwr",
         "normalization_factor": E0,
+        "smoothing_sigma": 0.0,
         "cbar_label": r"$\frac{eE_z}{m_e c\omega}$",
     },
     "Derived_Charge_Density": {
@@ -79,34 +83,39 @@ var_params = {
         "norm": SymLogNorm(linthresh=1e-2, linscale=1),
         "cmap": "bwr",
         "normalization_factor": nc * elementary_charge,
+        "smoothing_sigma": 3.0,
         "cbar_label": r"$\frac{\rho}{n_c e}$",
     },
-    "Derived_Number_Density_Subset_Deuteron": {
+    "Derived_Number_Density_Deuteron": {
         "title": "Deuteron Number Density",
         "norm": LogNorm(vmin=1e-5, vmax=2e1),
         "cmap": "viridis",
         "normalization_factor": nc,
+        "smoothing_sigma": 0.0,
         "cbar_label": r"$\frac{n_d}{n_c}$",
     },
-    "Derived_Number_Density_Subset_Electron": {
+    "Derived_Number_Density_Electron": {
         "title": " Electron Number Density",
         "norm": LogNorm(vmin=1e-5, vmax=2e1),
         "cmap": "viridis",
         "normalization_factor": nc,
+        "smoothing_sigma": 0.0,
         "cbar_label": r"$\frac{n_e}{n_c}$",
     },
-    "Derived_Temperature_Subset_Deuteron": {
+    "Derived_Temperature_Deuteron": {
         "title": "Deuteron Temperature",
         "norm": LogNorm(vmin=1e-5, vmax=2e1),
         "cmap": "plasma",
         "normalization_factor": K_in_MeV,
+        "smoothing_sigma": 0.0,
         "cbar_label": r"$T_d$ [MeV]",
     },
-    "Derived_Temperature_Subset_Electron": {
+    "Derived_Temperature_Electron": {
         "title": " Electron Number Density",
         "norm": LogNorm(vmin=1e-5, vmax=2e1),
         "cmap": "plasma",
         "normalization_factor": K_in_MeV,
+        "smoothing_sigma": 0.0,
         "cbar_label": r"$T_e$ [MeV]",
     },
 }
@@ -126,11 +135,16 @@ for var_name in var_names:
     data = np.load(
         os.path.join(input_dir, f"{var_name}_{plane.value}.npy"), allow_pickle=True
     )
-    data /= var_params[var_name]["normalization_factor"]
 
     # animate data
     ani, ax, cbar = animate_data(
-        data, time_stamps, extent, cmap=var_params[var_name]["cmap"], norm=var_params[var_name]["norm"]
+        data,
+        time_stamps,
+        extent,
+        cmap=var_params[var_name]["cmap"],
+        norm=var_params[var_name]["norm"],
+        normalization_factor=var_params[var_name]["normalization_factor"],
+        smoothing_sigma=var_params[var_name]["smoothing_sigma"],
     )
     cbar.set_label(var_params[var_name]["cbar_label"])
     ax.set_title(var_params[var_name]["title"])

@@ -5,6 +5,29 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug animate.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "animate.py",
+            "console": "integratedTerminal",
+            "args":[
+                "-i",
+                "/users/PAS2137/wang15032/EpochSims/analysis/3D_scaling/reduce_storage_20240505",
+                "-v",
+                "Derived_Charge_Density",
+                "-s",
+                "XY"
+            ]
+        },
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
+        {
             "name": "Debug show_content.py",
             "type": "debugpy",
             "request": "launch",

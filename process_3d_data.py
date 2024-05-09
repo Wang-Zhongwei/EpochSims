@@ -41,13 +41,6 @@ parser.add_argument(
     help="Which plane to save. Options are 'XY', 'XZ', 'YZ', or None",
 )
 
-parser.add_argument(
-    "-g",
-    "--save_grid",
-    action="store_true",
-    help="Whether to save the grid.npy file",
-)
-
 # parse arguments
 args = parser.parse_args()
 input_dir = args.input_dir
@@ -58,7 +51,6 @@ if args.subset:
     subset = Plane[args.subset]
 else:
     subset = None
-save_grid = args.save_grid
 
 # save frames
 for var_name in args.var_names:
@@ -66,7 +58,6 @@ for var_name in args.var_names:
         input_dir,
         prefix,
         var_name,
-        output_dir,
         subset,
-        save_grid,
+        output_dir,
     )

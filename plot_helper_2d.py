@@ -21,6 +21,8 @@ def animate_data(
     extent: Tuple[float, float, float, float] = [0, 1, 0, 1],
     norm: Normalize = Normalize(),
     cmap="viridis",
+    normalization_factor: float = 1.0,
+    smoothing_sigma: float = 0.0,
     **kwargs,
 ) -> Tuple[animation.FuncAnimation, Axes, Colorbar]:
     """animate data over time on a 2D plot
@@ -36,6 +38,12 @@ def animate_data(
     Returns:
         Tuple[animation.FuncAnimation, Axes, Colorbar]: animation, axis, and colorbar
     """
+    # normalize and smooth data
+    with mp.Pool(mp.cpu_count()) as pool:
+        data = pool.starmap(
+            transform_func, [(d, normalization_factor, smoothing_sigma) for d in data]
+        )
+
     fig, ax = plt.subplots()
     img = ax.imshow(
         data[0].T,
@@ -97,9 +105,7 @@ def animate_field(
     input_dir: str,
     field: Union[Scalar, Vector],
     species: Optional[Species] = None,
-    file_prefix: Optional[str] = None,
-    normalization_factor: float = 1.0,
-    smoothing_sigma: float = 0.0,
+    file_prefix: Optional[str] = None,    
     **kwargs,
 ) -> Tuple[animation.FuncAnimation, Axes, Colorbar]:
     if file_prefix is None:
@@ -123,12 +129,6 @@ def animate_field(
     for i in range(len(grid)):
         extent.append(grid[i][0])
         extent.append(grid[i][-1])
-
-    # normalize and smooth data
-    with mp.Pool(mp.cpu_count()) as pool:
-        data = pool.starmap(
-            transform_func, [(d, normalization_factor, smoothing_sigma) for d in data]
-        )
 
     return animate_data(
         data,

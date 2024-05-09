@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Union
+import os
 
 import numpy as np
 import sdf_helper as sh
@@ -15,33 +15,37 @@ def save_frames(
     input_dir: str,
     file_prefix: str,
     var_name: str,
+    subset: Plane,
     output_dir: str = None,
-    subset: Union[None, Plane] = None,
-    save_grid: bool = False,
 ):
 
     logging.info(f'Starting to save frames for variable {var_name}')
 
-    if subset is not None or save_grid:
+    # Check if grid.npy exists in the input_dir
+    grid_file_path = os.path.join(input_dir, "grid.npy")
+    if os.path.isfile(grid_file_path):
+        # Load the data from grid.npy into grid
+        grid = np.load(grid_file_path, allow_pickle=True)
+    else:
         grid = sh.getdata(
-            os.path.join(input_dir, f"{file_prefix}_0000.sdf"), verbose=False
-        ).Grid_Grid_mid.data
+            os.path.join(input_dir, f"{file_prefix}_0000.sdf"),verbose=False
+        ).Grid_Grid.data
 
-        if save_grid:
-            np.save(os.path.join(output_dir, "grid.npy"), grid)
+        # Save the data to grid.npy
+        np.save(grid_file_path, grid)
 
-        if subset is not None:
-            x_array, y_array, z_array = grid
-            slices = [slice(None), slice(None), slice(None)]
-            if subset == Plane.XY:
-                slices[2] = np.argmin(np.abs(z_array))
-            elif subset == Plane.XZ:
-                slices[1] = np.argmin(np.abs(y_array))
-            elif subset == Plane.YZ:
-                slices[0] = np.argmin(np.abs(x_array))
-            slices = tuple(slices)
+    x_array, y_array, z_array = grid
+    slices = [slice(None), slice(None), slice(None)]
+    if subset == Plane.XY:
+        slices[2] = np.argmin(np.abs(z_array))
+    elif subset == Plane.XZ:
+        slices[1] = np.argmin(np.abs(y_array))
+    elif subset == Plane.YZ:
+        slices[0] = np.argmin(np.abs(x_array))
+    slices = tuple(slices)
 
     num_frames = len([f for f in os.listdir(input_dir) if f.startswith(file_prefix)])
+    
     out_file_name = f"{var_name}_{subset.value}.npy"
 
     # Load data
