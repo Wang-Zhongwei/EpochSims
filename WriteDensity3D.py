@@ -76,9 +76,9 @@ def write_density(
         density.T.tofile(f)
 
 if __name__ == "__main__":
-    from configs.config import * 
+    from configs.base_config import * 
     # Get the axis data.
-    output_dir = 'input'
+    output_dir = 'temp'
 
     # nx, ny, nz = 1250, 767, 600
     nx, ny, nz = 500, 575, 450

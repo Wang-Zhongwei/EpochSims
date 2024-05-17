@@ -1,0 +1,106 @@
+[
+    {
+        "id": "0.2_area_20240227",
+        "data_dir_rel_path": "2D_scaling/0.2_area_20240227",
+        "laser": {
+            "lambda_0": 800e-9,
+            "I_0": 2.6e20,
+            "w_0": 1e-6,
+            "tau": 30e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": -8.918e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 400e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-50e-6, 50e-6], [-50e-6, 50e-6]],
+            "grid_size": [4000, 4000],
+            "time_interval": [0, 400e-15]
+        }
+    },
+    {
+        "id": "0.2_intensity_no_preplasma_off_target_20240329",
+        "data_dir_rel_path": "2D_scaling/0.2_intensity_no_preplasma_off_target_20240329",
+        "laser": {
+            "lambda_0": 800e-9,
+            "I_0": 2.6e20,
+            "w_0": 1e-6,
+            "tau": 30e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": -48e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 400e-9,
+            "has_preplasma": false
+        },
+        "domain": {
+            "boundaries": [[-50e-6, 50e-6], [-50e-6, 50e-6]],
+            "grid_size": [4000, 4000],
+            "time_interval": [0, 500e-15]
+        }
+    },
+    {
+        "id": "0.2_intensity_off_target_20240223",
+        "data_dir_rel_path": "2D_scaling/0.2_intensity_off_target_20240223",
+        "laser": {
+            "lambda_0": 800e-9,
+            "I_0": 2.6e20,
+            "w_0": 1e-6,
+            "tau": 30e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": -48e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 400e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-50e-6, 50e-6], [-50e-6, 50e-6]],
+            "grid_size": [4000, 4000],
+            "time_interval": [0, 400e-15]
+        }
+    },
+    {
+        "id": "0.2_intensity_on_target_20240229",
+        "data_dir_rel_path": "2D_scaling/0.2_intensity_on_target_20240229",
+        "laser": {
+            "lambda_0": 800e-9,
+            "I_0": 2.6e20,
+            "w_0": 1e-6,
+            "tau": 30e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": 0,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 400e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-50e-6, 50e-6], [-50e-6, 50e-6]],
+            "grid_size": [4000, 4000],
+            "time_interval": [0, 400e-15]
+        }
+    }
+]
