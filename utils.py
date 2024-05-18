@@ -4,6 +4,7 @@ import sys
 import time
 from enum import Enum
 from math import cos, pi
+import sdf
 
 import numpy as np
 from scipy.constants import elementary_charge, epsilon_0, m_e, speed_of_light
@@ -54,69 +55,16 @@ def timer(func):
 
     return wrapper
 
-
-def calc_beam_radius(w_0, z, lambda_0):
-    """Calculate beam radius at position z for a laser with wavelength lambda_0
-
-    Args:
-        w_0 (float): beam waist in m
-        z (float): axial distance from beam waist in m
-        lambda_0 (float): wavelength of laser in m
-    Returns:
-        float: beam radius w(z) at position z in m
-    """
-
-    x_R = pi * w_0**2 / lambda_0
-    return w_0 * (1 + (z / x_R) ** 2) ** 0.5
-
-
-def calc_beam_energy(I_0, w_0, tau):
-    """calculate the energy of a Gaussian beam
-
-    Args:
-        I_0 (float): intensity of the beam in W/cm^2
-        w_0 (float): spot size of the beam in m
-        tau (float): duration of the pulse in s
-
-    Returns:
-        float: energy of the beam in J
-    """
-    I_0 = I_0 * 1e4
-
-    return pi * w_0**2 * I_0 * tau
-
-
-def calc_z(w_0, w, lambda_0):
-    """Reverse function of calc_beam_waist
-
-    Args:
-        w_0 (float): beam waist in m
-        w (float): beam radius w(z) at position z in m
-        lambda_0 (float): wavelength of laser in m
-
-    Returns:
-        float: axial distance z from beam waist in m
-    """
-    x_R = pi * w_0**2 / lambda_0
-    return x_R * ((w / w_0) ** 2 - 1) ** 0.5
-
-
-def calc_critical_density(lambda_0: float):
-    """Calculate the critical density of a plasma
-
-    Args:
-        lambda_0 (float): wavelength of laser in m
-
-    Returns:
-        float: critical density in m^-3
-    """
-    omega_0 = 2 * pi * speed_of_light / lambda_0
-    return omega_0**2 * m_e * epsilon_0 / elementary_charge**2
-
-
-def calc_plasma_frequency(n_e: float):
-    """Calculate the plasma frequency of a plasma"""
-    return np.sqrt(n_e * elementary_charge**2 / (m_e * epsilon_0))
+def get_tnsa_data(pmovie: sdf.BlockList) -> np.ndarray:
+    if hasattr(pmovie, "Particles_Ek_subset_TNSA_Hydrogen"):
+        quantity = pmovie.Particles_Ek_subset_TNSA_Hydrogen
+    elif hasattr(pmovie, "Particles_Ek_subset_TNSA_Deuteron"):
+        quantity = pmovie.Particles_Ek_subset_TNSA_Deuteron
+    elif hasattr(pmovie, "Particles_Ek_subset_TNSA"):
+        quantity = pmovie.Particles_Ek_subset_TNSA
+    else:
+        raise ValueError("No TNSA Quantity found")
+    return quantity.data
 
 
 class GaussianBeam:
@@ -301,3 +249,6 @@ class Simulation:
     def calc_beam_area_on_target(self):
         return pi * self.calc_beam_radius_on_target()**2
     
+    def calc_beam_intensity_on_target(self):
+        axial_distance = -self.laser.focus_x / cos(self.laser.incidence_theta)
+        return self.laser.calc_intensity(axial_distance)

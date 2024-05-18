@@ -6,11 +6,11 @@ from typing import Union
 from matplotlib.colors import LogNorm, SymLogNorm
 from scipy.constants import elementary_charge
 
-from configs.base_config import ANALYSIS_BASE_PATH, OUTPUT_BASE_PATH
+from configs.base_config import ANALYSIS_BASE_PATH, OUTPUT_BASE_PATH, REPO_PATH
 from utils import Domain, GaussianBeam, Quantity, Simulation, Species, Target
 
 
-def load_metadata(file_path: str = "configs/metadata.json") -> dict:
+def load_metadata(file_path: str) -> dict:
     with open(file_path, "r") as file:
         metadata = json.load(file)
     return metadata
@@ -24,7 +24,7 @@ def get_simulation_metadata(metadata: dict, simulation_id: str) -> Union[None, d
 
 
 def get_simulation(simulation_id: str) -> Simulation:
-    metadata = load_metadata()
+    metadata = load_metadata(os.path.join(REPO_PATH, "configs", "metadata.json"))
     simulation_metadata = get_simulation_metadata(metadata, simulation_id)
     if simulation_metadata is None:
         raise ValueError(f"Simulation with id {simulation_id} not found in metadata")
