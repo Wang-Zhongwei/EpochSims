@@ -12,7 +12,12 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.colors import Normalize
 from scipy import ndimage
 
-from utils import Scalar, Species, Vector, timer
+from utils import Quantity, Species, timer
+import logging
+
+logger = logging.getLogger("plot_helper_2d")
+logger.setLevel(logging.DEBUG)
+
 
 @timer
 def animate_data(
@@ -41,7 +46,8 @@ def animate_data(
     # normalize and smooth data
     with mp.Pool(mp.cpu_count()) as pool:
         data = pool.starmap(
-            transform_func, [(d, normalization_factor, smoothing_sigma) for d in data]
+            gaussian_filter_func,
+            [(d, normalization_factor, smoothing_sigma) for d in data],
         )
 
     fig, ax = plt.subplots()
@@ -78,21 +84,17 @@ def animate_data(
 
     return ani, ax, cbar
 
-def read_quantity_from_sdf(
-    sdf: sdf.BlockList,
-    field: Union[Scalar, Vector],
-    species: Optional[Species] = None,
-) -> sdf.BlockList:
-    if species is not None:
-        if species == Species.ALL:
-            return sdf.__getattribute__(f"{field.value}")
-        else:
-            return sdf.__getattribute__(f"{field.value}_{species.value}")
-    else:
-        return sdf.__getattribute__(f"{field.value}")
+
+def read_quantity_from_sdf(sdf: sdf.BlockList, quantity_name: str) -> sdf.BlockList:
+    try:
+        return sdf.__getattribute__(quantity_name)
+    except AttributeError:
+        raise ValueError(
+            f"The specified quantity '{quantity_name}' does not exist in the sdf file."
+        )
 
 
-def transform_func(
+def gaussian_filter_func(
     data: np.ndarray, normalization_factor: float = 1.0, smoothing_sigma: float = 0.0
 ) -> np.ndarray:
     data /= normalization_factor
@@ -101,15 +103,17 @@ def transform_func(
     return data
 
 
-def animate_field(
+def animate_quantity(
     input_dir: str,
-    field: Union[Scalar, Vector],
+    file_prefix: str,
+    quantity: Quantity,
     species: Optional[Species] = None,
-    file_prefix: Optional[str] = None,    
     **kwargs,
 ) -> Tuple[animation.FuncAnimation, Axes, Colorbar]:
-    if file_prefix is None:
-        file_prefix = "fmovie" if species is None else "smovie"
+
+    quantity_name = f"{quantity.value}"
+    if species is not None:
+        quantity_name += f"_{species.value}"
 
     num_frames = len([f for f in os.listdir(input_dir) if f.startswith(file_prefix)])
 
@@ -119,9 +123,11 @@ def animate_field(
         sdf = sh.getdata(
             os.path.join(input_dir, f"{file_prefix}_{i:04d}.sdf"), verbose=False
         )
-        quantity = read_quantity_from_sdf(sdf, field, species)
+        quantity = read_quantity_from_sdf(sdf, quantity_name)
         data.append(quantity.data)
         time_stamps.append(sdf.Header["time"])
+
+    logger.debug(f"Read {quantity_name} data from {input_dir}")
 
     # get domain extent
     grid = quantity.grid.data

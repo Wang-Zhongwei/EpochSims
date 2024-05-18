@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import time
 from enum import Enum
 from math import cos, pi
@@ -16,24 +17,18 @@ class Plane(Enum):
     YZ = "YZ"
     XYZ = "XYZ"
 
-
 class Species(Enum):
     ELECTRON = "Electron"
     PROTON = "Proton"
     DEUTERON = "Deuteron"
     HYDROGEN = "Hydrogen"
     CARBON = "Carbon"
-    ALL = ""
 
-
-class Scalar(Enum):
+class Quantity(Enum):
     NUMBER_DENSITY = "Derived_Number_Density"
     TEMPERATURE = "Derived_Temperature"
     CHARGE_DENSITY = "Derived_Charge_Density"
     AVG_PARTICLE_ENERGY = "Derived_Average_Particle_Energy"
-
-
-class Vector(Enum):
     Ex = "Electric_Field_Ex"
     Ey = "Electric_Field_Ey"
     Ez = "Electric_Field_Ez"
@@ -51,7 +46,7 @@ def timer(func):
         result = func(*args, **kwargs)  # Function execution
         end_time = time.time()  # End time after function execution
 
-        logging.info(
+        logging.debug(
             f"Function {func.__name__} took {end_time - start_time:.3f} seconds to execute."
         )
 
@@ -284,12 +279,17 @@ class Simulation:
         self.domain = domain
         self.target = target
         
+        if not os.path.exists(self.data_dir_path):
+            logging.error(f"Data directory {self.data_dir_path} does not exist")
+            sys.exit(1)
         try: 
             os.makedirs(self.analysis_dir_path, exist_ok=True)
         except PermissionError as e:
             logging.error(f"No permission for creating analysis directory {self.analysis_dir_path}")
+            sys.exit(1)
         except Exception as e:
             logging.error(f"Error creating analysis directory {self.analysis_dir_path}: {e}")
+            sys.exit(1)
 
     def __repr__(self):
         return f"Simulation(data_dir_path='{self.data_dir_path}', laser={repr(self.laser)}, domain={repr(self.domain)}, target={repr(self.target)})"
