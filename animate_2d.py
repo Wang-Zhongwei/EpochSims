@@ -27,7 +27,8 @@ for simulation_id in simulation_ids:
     simulation = get_simulation(simulation_id)
     plotting_params = get_plotting_parameters(simulation)
     for quantity in default_quantities:
-        for species in plotting_params[quantity]["species"]:
+        quantity_params = plotting_params.get(quantity)
+        for species in quantity_params["species"]:
             plot_title = f"{quantity.value}".replace("_", " ")
             if species is not None:
                 plot_title = f"{species.value} " + plot_title
@@ -35,18 +36,17 @@ for simulation_id in simulation_ids:
             try:
                 ani, ax, cbar = animate_quantity(
                     simulation.data_dir_path,
-                    plotting_params[quantity]["file_prefix"],
+                    quantity_params["file_prefix"],
                     quantity,
                     species=species,
-                    normalization_factor=plotting_params[quantity][
-                        "normalization_factor"
-                    ],
-                    norm=plotting_params[quantity]["norm"],
-                    cmap=plotting_params[quantity]["cmap"],
+                    normalization_factor=quantity_params["normalization_factor"],
+                    norm=quantity_params["norm"],
+                    cmap=quantity_params["cmap"],
+                    smoothing_sigma=quantity_params["smoothing_sigma"],
                 )
                 logger.debug(f"Animation created for {plot_title}")
 
-                cbar.set_label(plotting_params[quantity]["cbar_label"])
+                cbar.set_label(quantity_params["cbar_label"])
                 ax.set_title(plot_title)
                 ax.set_xlabel("x [m]")
                 ax.set_ylabel("y [m)")

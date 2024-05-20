@@ -55,16 +55,26 @@ def timer(func):
 
     return wrapper
 
-def get_tnsa_data(pmovie: sdf.BlockList) -> np.ndarray:
+def get_tnsa_data(pmovie: sdf.BlockList) -> tuple[np.ndarray,np.ndarray]:
     if hasattr(pmovie, "Particles_Ek_subset_TNSA_Hydrogen"):
-        quantity = pmovie.Particles_Ek_subset_TNSA_Hydrogen
+        energy = pmovie.Particles_Ek_subset_TNSA_Hydrogen
     elif hasattr(pmovie, "Particles_Ek_subset_TNSA_Deuteron"):
-        quantity = pmovie.Particles_Ek_subset_TNSA_Deuteron
-    elif hasattr(pmovie, "Particles_Ek_subset_TNSA"):
-        quantity = pmovie.Particles_Ek_subset_TNSA
+        energy = pmovie.Particles_Ek_subset_TNSA_Deuteron
+    elif hasattr(pmovie, "Particles_Ek_subset_TNSA_Deuteron_Deuteron"):
+        energy = pmovie.Particles_Ek_subset_TNSA_Deuteron_Deuteron
     else:
-        raise ValueError("No TNSA Quantity found")
-    return quantity.data
+        raise ValueError("No TNSA energy data found")
+    
+    if hasattr(pmovie, "Particles_Weight_subset_TNSA_Hydrogen"):
+        weight = pmovie.Particles_Weight_subset_TNSA_Hydrogen
+    elif hasattr(pmovie, "Particles_Weight_subset_TNSA_Deuteron"):
+        weight = pmovie.Particles_Weight_subset_TNSA_Deuteron
+    elif hasattr(pmovie, "Particles_Weight_subset_TNSA_Deuteron_Deuteron"):
+        weight = pmovie.Particles_Weight_subset_TNSA_Deuteron_Deuteron
+    else:
+        raise ValueError("No TNSA weight data found")
+    
+    return energy.data, weight.data
 
 
 class GaussianBeam:

@@ -191,7 +191,7 @@
             "tau": 30e-15,
             "incidence_angle": 22.5,
             "focus": {
-                "x": -46.205e-6,
+                "x": -96.205e-6,
                 "y": 0
             }
         },
@@ -205,6 +205,32 @@
             "boundaries": [[-50e-6, 50e-6], [-50e-6, 50e-6]],
             "grid_size": [4000, 4000],
             "time_interval": [0, 400e-15]
+        }
+    },
+    {
+        "id": "2_intensity_no_preplasma_off_target_20240328",
+        "data_dir_rel_path": "2D_scaling/2_intensity_no_preplasma_on_target_20240329",
+        "laser": {
+            "lambda_0": 800e-9,
+            "I_0": 2.6e21,
+            "w_0": 1e-6,
+            "tau": 30e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": -48e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 400e-9,
+            "has_preplasma": false
+        },
+        "domain": {
+            "boundaries": [[-50e-6, 50e-6], [-50e-6, 50e-6]],
+            "grid_size": [4000, 4000],
+            "time_interval": [0, 500e-15]
         }
     },
     {
@@ -410,7 +436,33 @@
             "has_preplasma": true
         },
         "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-50e-6, 50e-6]],
+            "boundaries": [[-25e-6, 25e-6], [-18.55e-6, 31.45e-6]],
+            "grid_size": [2000, 2000],
+            "time_interval": [0, 500e-15]
+        }
+    },
+    {
+        "id": "1e20_off_target_preplasma_20240519",
+        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e20_off_target_preplasma_20240519",
+        "laser": {
+            "lambda_0": 800e-9,
+            "I_0": 1e20,
+            "w_0": 1e-6,
+            "tau": 30e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": -48e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 400e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
             "grid_size": [4000, 4000],
             "time_interval": [0, 500e-15]
         }
