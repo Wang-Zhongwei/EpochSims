@@ -1,12 +1,14 @@
 # metadata.py
 import json
 import os
+import sys
 from typing import Union
 
+from .base_config import ANALYSIS_BASE_PATH, OUTPUT_BASE_PATH, REPO_PATH
 from matplotlib.colors import LogNorm, SymLogNorm
 from scipy.constants import elementary_charge
 
-from configs.base_config import ANALYSIS_BASE_PATH, OUTPUT_BASE_PATH, REPO_PATH
+sys.path.append(REPO_PATH)
 from utils import Domain, GaussianBeam, Quantity, Simulation, Species, Target
 
 
@@ -72,7 +74,7 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
     # todo: modify norm based on simulation configs
     K_in_MeV = 11604518122
     return {
-        Quantity.Ez: {
+        Quantity.Ex: {
             "norm": SymLogNorm(linthresh=1e-2, linscale=1),
             "cmap": "bwr",
             "species": [None],
@@ -129,10 +131,3 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
         },
     }
 
-
-# test
-if __name__ == "__main__":
-    simulation = get_simulation("0.2_area_20240227")
-    print(simulation.calc_beam_radius_on_target())
-    print(simulation.laser.critical_density)
-    print(simulation.target.plasma_frequency)
