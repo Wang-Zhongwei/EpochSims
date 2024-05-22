@@ -49,17 +49,17 @@ for simulation_id in simulation_ids:
                 cbar.set_label(quantity_params["cbar_label"])
                 ax.set_title(plot_title)
                 ax.set_xlabel("x [m]")
-                ax.set_ylabel("y [m)")
+                ax.set_ylabel("y [m]")
 
                 filename = plot_title.lower().replace(" ", "_") + "_movie.mp4"
-                out_dir = os.path.join(simulation.analysis_dir_path, filename)
+                out_path = os.path.join(simulation.analysis_dir_path, filename)
 
                 ani.save(
-                    out_dir,
+                    out_path,
                     writer="ffmpeg",
                     fps=10,
                     dpi=300,
                 )
-                logger.info(f"Saved animation {filename} to {out_dir}")
+                logger.info(f"Saved animation {filename} to {out_path}")
             except Exception as e:
                 logger.error(f"Error creating animation: {e}")

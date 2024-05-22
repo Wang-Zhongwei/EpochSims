@@ -27,7 +27,7 @@ def get_simulation(simulation_id: str) -> Simulation:
     metadata = load_metadata(os.path.join(REPO_PATH, "configs", "metadata.json"))
     simulation_metadata = get_simulation_metadata(metadata, simulation_id)
     if simulation_metadata is None:
-        raise ValueError(f"Simulation with id {simulation_id} not found in metadata")
+        raise ValueError(f"Simulation with id {simulation_id} not found in metadata.json")
 
     domain_metadata = simulation_metadata["domain"]
     domain = Domain(
