@@ -416,37 +416,11 @@
         }
     },
     {
-        "id": "1e20_off_target_preplasma_20240514",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e20_off_target_preplasma_20240514",
+        "id": "2.6e21_off_target_preplasma_20240524",
+        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/2.6e21_off_target_preplasma_20240524",
         "laser": {
             "lambda_0": 800e-9,
-            "I_0": 1e20,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": -48e-6,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": true
-        },
-        "domain": {
-            "boundaries": [[-25e-6, 25e-6], [-18.55e-6, 31.45e-6]],
-            "grid_size": [2000, 2000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "1e20_off_target_preplasma_20240519",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e20_off_target_preplasma_20240519",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 1e20,
+            "I_0": 2.6e21,
             "w_0": 1e-6,
             "tau": 30e-15,
             "incidence_angle": 22.5,
@@ -468,11 +442,11 @@
         }
     },
     {
-        "id": "1e20_on_target_preplasma_20240520",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e20_on_target_preplasma_20240520",
+        "id": "2.6e21_on_target_preplasma_20240524",
+        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/2.6e21_on_target_preplasma_20240524",
         "laser": {
             "lambda_0": 800e-9,
-            "I_0": 1e20,
+            "I_0": 2.6e21,
             "w_0": 1e-6,
             "tau": 30e-15,
             "incidence_angle": 22.5,
@@ -494,63 +468,11 @@
         }
     },
     {
-        "id": "1e20_off_target_no_preplasma_20240520",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e20_off_target_no_preplasma_20240520",
+        "id": "6.5e21_off_target_preplasma_20240524",
+        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/6.5e21_off_target_preplasma_20240524",
         "laser": {
             "lambda_0": 800e-9,
-            "I_0": 1e20,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": -48e-6,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": false
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "1e20_on_target_no_preplasma_20240520",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e20_on_target_no_preplasma_20240520",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 1e20,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": 0,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": false
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "5e21_off_target_preplasma_20240520",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/5e21_off_target_preplasma_20240520",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 5e21,
+            "I_0": 6.5e21,
             "w_0": 1e-6,
             "tau": 30e-15,
             "incidence_angle": 22.5,
@@ -572,276 +494,16 @@
         }
     },
     {
-        "id": "5e21_on_target_preplasma_20240520",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/5e21_on_target_preplasma_20240520",
+        "id": "6.5e21_on_target_preplasma_20240524",
+        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/6.5e21_on_target_preplasma_20240524",
         "laser": {
             "lambda_0": 800e-9,
-            "I_0": 5e21,
+            "I_0": 6.5e21,
             "w_0": 1e-6,
             "tau": 30e-15,
             "incidence_angle": 22.5,
             "focus": {
                 "x": 0,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": true
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "5e21_on_target_no_preplasma_20240520",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/5e21_on_target_no_preplasma_20240520",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 5e21,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": 0,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": false
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "5e21_off_target_no_preplasma_20240520",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/5e21_off_target_no_preplasma_20240520",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 5e21,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": -48e-6,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": false
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "1e21_off_target_preplasma_20240520",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e21_off_target_preplasma_20240520",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 1e21,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": -48e-6,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": true
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "1e21_on_target_preplasma_20240520",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e21_on_target_preplasma_20240520",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 1e21,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": 0,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": true
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "1e21_on_target_no_preplasma_20240520",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e21_on_target_no_preplasma_20240520",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 1e21,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": 0,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": false
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "1e21_off_target_no_preplasma_20240520",
-        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e21_off_target_no_preplasma_20240520",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 1e21,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": -48e-6,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": false
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "1e21_on_target_w_preplasma_20240521",
-        "data_dir_rel_path": "2D_scaling_exp_preplasma/1e21_on_target_w_preplasma_20240521",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 1e21,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": 0,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": true
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "1e21_off_target_w_preplasma_20240521",
-        "data_dir_rel_path": "2D_scaling_exp_preplasma/1e21_off_target_w_preplasma_20240521",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 1e21,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": -48e-6,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": true
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "5e21_on_target_w_preplasma_20240521",
-        "data_dir_rel_path": "2D_scaling_exp_preplasma/5e21_on_target_w_preplasma_20240521",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 5e21,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": 0,
-                "y": 0
-            }
-        },
-        "target": {
-            "material": "8CB",
-            "electron_number_density": 3.274368e29,
-            "thickness": 400e-9,
-            "has_preplasma": true
-        },
-        "domain": {
-            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
-            "grid_size": [4000, 4000],
-            "time_interval": [0, 500e-15]
-        }
-    },
-    {
-        "id": "5e21_off_target_w_preplasma_20240521",
-        "data_dir_rel_path": "2D_scaling_exp_preplasma/5e21_off_target_w_preplasma_20240521",
-        "laser": {
-            "lambda_0": 800e-9,
-            "I_0": 5e21,
-            "w_0": 1e-6,
-            "tau": 30e-15,
-            "incidence_angle": 22.5,
-            "focus": {
-                "x": -48e-6,
                 "y": 0
             }
         },

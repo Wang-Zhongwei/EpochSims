@@ -29,7 +29,9 @@ def get_simulation(simulation_id: str) -> Simulation:
     metadata = load_metadata(os.path.join(REPO_PATH, "configs", "metadata.json"))
     simulation_metadata = get_simulation_metadata(metadata, simulation_id)
     if simulation_metadata is None:
-        raise ValueError(f"Simulation with id {simulation_id} not found in metadata.json")
+        raise ValueError(
+            f"Simulation with id {simulation_id} not found in metadata.json"
+        )
 
     domain_metadata = simulation_metadata["domain"]
     domain = Domain(
@@ -73,9 +75,17 @@ def get_simulation(simulation_id: str) -> Simulation:
 def get_plotting_parameters(simulation: Simulation) -> dict:
     # todo: modify norm based on simulation configs
     K_in_MeV = 11604518122
+    normalized_peak_electric_field = (
+        simulation.laser.peak_electric_field / simulation.laser.normalized_amplitude
+    )
     return {
         Quantity.Ex: {
-            "norm": SymLogNorm(linthresh=1e-2, linscale=1),
+            "norm": SymLogNorm(
+                vmin=-normalized_peak_electric_field,
+                vmax=normalized_peak_electric_field,
+                linthresh=1e-2,
+                linscale=1,
+            ),
             "cmap": "bwr",
             "species": [None],
             "normalization_factor": simulation.laser.normalized_amplitude,
@@ -84,7 +94,12 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
             "file_prefix": "fmovie",
         },
         Quantity.Ey: {
-            "norm": SymLogNorm(linthresh=1e-2, linscale=1),
+            "norm": SymLogNorm(
+                vmin=-normalized_peak_electric_field,
+                vmax=normalized_peak_electric_field,
+                linthresh=1e-2,
+                linscale=1,
+            ),
             "cmap": "bwr",
             "species": [None],
             "normalization_factor": simulation.laser.normalized_amplitude,
@@ -93,7 +108,12 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
             "file_prefix": "fmovie",
         },
         Quantity.Ez: {
-            "norm": SymLogNorm(linthresh=1e-2, linscale=1),
+            "norm": SymLogNorm(
+                vmin=-normalized_peak_electric_field,
+                vmax=normalized_peak_electric_field,
+                linthresh=1e-2,
+                linscale=1,
+            ),
             "cmap": "bwr",
             "species": [None],
             "normalization_factor": simulation.laser.normalized_amplitude,
@@ -130,4 +150,3 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
             "file_prefix": "smovie",
         },
     }
-

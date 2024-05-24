@@ -296,7 +296,7 @@ if __name__ == "__main__":
                     ani.save(
                         out_path,
                         writer="ffmpeg",
-                        fps=10,
+                        fps=5,
                         dpi=300,
                     )
                     logger.info(f"Saved animation {filename} to {out_path}")
