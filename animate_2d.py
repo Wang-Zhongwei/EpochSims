@@ -44,11 +44,12 @@ def animate_data(
         Tuple[animation.FuncAnimation, Axes, Colorbar]: animation, axis, and colorbar
     """
     # normalize and smooth data
-    with mp.Pool(mp.cpu_count()) as pool:
-        data = pool.starmap(
-            gaussian_filter_func,
-            [(d, normalization_factor, smoothing_sigma) for d in data],
-        )
+    if normalization_factor > 0:
+        with mp.Pool(mp.cpu_count()) as pool:
+            data = pool.starmap(
+                gaussian_filter_func,
+                [(d, normalization_factor, smoothing_sigma) for d in data],
+            )
 
     fig, ax = plt.subplots()
     img = ax.imshow(
@@ -98,8 +99,7 @@ def gaussian_filter_func(
     data: np.ndarray, normalization_factor: float = 1.0, smoothing_sigma: float = 0.0
 ) -> np.ndarray:
     data /= normalization_factor
-    if smoothing_sigma > 0:
-        data = ndimage.gaussian_filter(data, sigma=smoothing_sigma)
+    data = ndimage.gaussian_filter(data, sigma=smoothing_sigma)
     return data
 
 
@@ -207,6 +207,7 @@ def animate_phase_space(inp_dir, out_dir, animation_name, interval, species, **k
     Returns:
         None
     """
+    # todo: change boudnary limits to variables
     dim = kwargs.pop("dim", 1)
     x_min = kwargs.pop("x_min", -1e-5)
     x_max = kwargs.pop("x_max", 1e-5)
@@ -218,7 +219,7 @@ def animate_phase_space(inp_dir, out_dir, animation_name, interval, species, **k
     # multi-processing is about twice as fast as multi-threading
     length = num_of_pmovies // interval
     dist = [None] * length
-    with mp.Pool(processes=40) as pool:
+    with mp.Pool(processes=mp.cpu_count()) as pool:
         for animation_frame in range(length):
             pool.apply_async(
                 get_phase_space_distribution,
@@ -256,10 +257,11 @@ if __name__ == "__main__":
     simulation_ids = args.simulation_ids
 
     default_quantities = [
-        Quantity.Ex,
-        Quantity.CHARGE_DENSITY,
-        Quantity.NUMBER_DENSITY,
-        Quantity.TEMPERATURE,
+        # Quantity.Ex,
+        # Quantity.CHARGE_DENSITY,
+        # Quantity.NUMBER_DENSITY,
+        # Quantity.TEMPERATURE,
+        Quantity.Px
     ]
 
     for simulation_id in simulation_ids:

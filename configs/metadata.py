@@ -67,7 +67,12 @@ def get_simulation(simulation_id: str) -> Simulation:
         ANALYSIS_BASE_PATH, simulation_metadata["data_dir_rel_path"]
     )
     simulation = Simulation(
-        data_dir_path, analysis_dir_path, laser=laser, domain=domain, target=target
+        simulation_id,
+        data_dir_path,
+        analysis_dir_path,
+        laser=laser,
+        domain=domain,
+        target=target,
     )
     return simulation
 
@@ -77,6 +82,11 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
     K_in_MeV = 11604518122
     normalized_peak_electric_field = (
         simulation.laser.peak_electric_field / simulation.laser.normalized_amplitude
+    )
+    normalized_momentum = (
+        simulation.laser.peak_electric_field
+        * elementary_charge
+        / simulation.laser.angular_frequency
     )
     return {
         Quantity.Ex: {
@@ -147,6 +157,20 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
             "normalization_factor": K_in_MeV,
             "smoothing_sigma": 0.0,
             "cbar_label": r"$T$ [MeV]",
+            "file_prefix": "smovie",
+        },
+        Quantity.Px: {
+            "norm": SymLogNorm(
+                linthresh=1e-2,
+                linscale=1,
+                vmin=-1000,
+                vmax=1000
+            ),
+            "cmap": "bwr",
+            "species": [Species.DEUTERON],
+            "normalization_factor": normalized_momentum,
+            "smoothing_sigma": 0.0,
+            "cbar_label": r"$P_x\omega_0/eE$",
             "file_prefix": "smovie",
         },
     }

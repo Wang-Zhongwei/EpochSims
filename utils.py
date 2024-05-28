@@ -18,12 +18,14 @@ class Plane(Enum):
     YZ = "YZ"
     XYZ = "XYZ"
 
+
 class Species(Enum):
     ELECTRON = "Electron"
     PROTON = "Proton"
     DEUTERON = "Deuteron"
     HYDROGEN = "Hydrogen"
     CARBON = "Carbon"
+
 
 class Quantity(Enum):
     NUMBER_DENSITY = "Derived_Number_Density"
@@ -39,6 +41,7 @@ class Quantity(Enum):
     Sx = "Derived_Poynting_Flux_x"
     Sy = "Derived_Poynting_Flux_y"
     Sz = "Derived_Poynting_Flux_z"
+    Px = "Derived_Particles_Average_Px"
 
 
 def timer(func):
@@ -55,7 +58,8 @@ def timer(func):
 
     return wrapper
 
-def get_tnsa_data(pmovie: sdf.BlockList) -> tuple[np.ndarray,np.ndarray]:
+
+def get_tnsa_data(pmovie: sdf.BlockList) -> tuple[np.ndarray, np.ndarray]:
     if hasattr(pmovie, "Particles_Ek_subset_TNSA_Hydrogen"):
         energy = pmovie.Particles_Ek_subset_TNSA_Hydrogen
     elif hasattr(pmovie, "Particles_Ek_subset_TNSA_Deuteron"):
@@ -64,7 +68,7 @@ def get_tnsa_data(pmovie: sdf.BlockList) -> tuple[np.ndarray,np.ndarray]:
         energy = pmovie.Particles_Ek_subset_TNSA_Deuteron_Deuteron
     else:
         raise ValueError("No TNSA energy data found")
-    
+
     if hasattr(pmovie, "Particles_Weight_subset_TNSA_Hydrogen"):
         weight = pmovie.Particles_Weight_subset_TNSA_Hydrogen
     elif hasattr(pmovie, "Particles_Weight_subset_TNSA_Deuteron"):
@@ -73,7 +77,7 @@ def get_tnsa_data(pmovie: sdf.BlockList) -> tuple[np.ndarray,np.ndarray]:
         weight = pmovie.Particles_Weight_subset_TNSA_Deuteron_Deuteron
     else:
         raise ValueError("No TNSA weight data found")
-    
+
     return energy.data, weight.data
 
 
@@ -139,7 +143,7 @@ class GaussianBeam:
         """
         lambda_0 = self.lambda_0
         return 2 * pi * speed_of_light / lambda_0
-    
+
     @property
     def critical_density(self):
         """
@@ -150,7 +154,7 @@ class GaussianBeam:
             Above this density, the plasma becomes opaque to the laser light.
         """
         return self.angular_frequency**2 * m_e * epsilon_0 / elementary_charge**2
-    
+
     @property
     def normalized_amplitude(self):
         return m_e * speed_of_light * self.angular_frequency / elementary_charge
@@ -218,10 +222,12 @@ class Target:
         self.electron_number_density = electron_number_density
         self.thickness = thickness
         self.has_preplasma = has_preplasma
-    
+
     @property
     def plasma_frequency(self):
-        return np.sqrt(self.electron_number_density * elementary_charge**2 / (m_e * epsilon_0))
+        return np.sqrt(
+            self.electron_number_density * elementary_charge**2 / (m_e * epsilon_0)
+        )
 
     def __repr__(self):
         return f"Target('{self.material}', {self.electron_number_density}, {self.thickness}, {self.has_preplasma})"
@@ -229,36 +235,47 @@ class Target:
 
 class Simulation:
     def __init__(
-        self, data_dir_path: str, analysis_dir_path: str, laser: GaussianBeam, domain: Domain, target: Target
+        self,
+        simulation_id: str,
+        data_dir_path: str,
+        analysis_dir_path: str,
+        laser: GaussianBeam,
+        domain: Domain,
+        target: Target,
     ) -> None:
+        self.simulation_id = simulation_id
         self.data_dir_path = data_dir_path
         self.analysis_dir_path = analysis_dir_path
         self.laser = laser
         self.domain = domain
         self.target = target
-        
+
         if not os.path.exists(self.data_dir_path):
             logging.error(f"Data directory {self.data_dir_path} does not exist")
             sys.exit(1)
-        try: 
+        try:
             os.makedirs(self.analysis_dir_path, exist_ok=True)
         except PermissionError as e:
-            logging.error(f"No permission for creating analysis directory {self.analysis_dir_path}")
+            logging.error(
+                f"No permission for creating analysis directory {self.analysis_dir_path}"
+            )
             sys.exit(1)
         except Exception as e:
-            logging.error(f"Error creating analysis directory {self.analysis_dir_path}: {e}")
+            logging.error(
+                f"Error creating analysis directory {self.analysis_dir_path}: {e}"
+            )
             sys.exit(1)
 
     def __repr__(self):
-        return f"Simulation(data_dir_path='{self.data_dir_path}', laser={repr(self.laser)}, domain={repr(self.domain)}, target={repr(self.target)})"
+        return f"Simulation(simulation_id='{self.simulation_id}', laser={repr(self.laser)}, domain={repr(self.domain)}, target={repr(self.target)})"
 
     def calc_beam_radius_on_target(self):
         axial_distance = -self.laser.focus_x / cos(self.laser.incidence_theta)
         return self.laser.calc_beam_radius(axial_distance)
-    
+
     def calc_beam_area_on_target(self):
-        return pi * self.calc_beam_radius_on_target()**2
-    
+        return pi * self.calc_beam_radius_on_target() ** 2
+
     def calc_beam_intensity_on_target(self):
         axial_distance = -self.laser.focus_x / cos(self.laser.incidence_theta)
         return self.laser.calc_intensity(axial_distance)
