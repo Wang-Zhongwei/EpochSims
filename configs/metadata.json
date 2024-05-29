@@ -570,5 +570,83 @@
             "grid_size": [2000, 2000],
             "time_interval": [0, 500e-15]
         }
+    },
+    {
+        "id": "1.3e21_preplasma_on_target_20240527",
+        "data_dir_rel_path": "3D_scaling/1.3e21_preplasma_on_target_20240527",
+        "laser": {
+            "lambda_0": 800e-9,
+            "I_0": 1.3e21,
+            "w_0": 1e-6,
+            "tau": 30e-15,
+            "incidence_angle": 22,
+            "focus": {
+                "x": -5e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 400e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-10e-6, 10e-6], [-9e-6, 14e-6], [-9e-6, 9e-6]],
+            "grid_size": [1250, 767, 600],
+            "time_interval": [0, 400e-15]
+        }
+    },
+    {
+        "id": "1e21_off_target_50nm_no_preplasma_20240528",
+        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e21_off_target_50nm_no_preplasma_20240528",
+        "laser": {
+            "lambda_0": 800e-9,
+            "I_0": 1.3e21,
+            "w_0": 1e-6,
+            "tau": 30e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": -48e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 50e-9,
+            "has_preplasma": false
+        },
+        "domain": {
+            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
+            "grid_size": [4000, 4000],
+            "time_interval": [0, 500e-15]
+        }
+    },
+    {
+        "id": "1e21_off_target_10nm_no_solid_target_20240528",
+        "data_dir_rel_path": "2D_scaling_gaussian_preplasma/1e21_off_target_10nm_no_solid_target_20240528",
+        "laser": {
+            "lambda_0": 800e-9,
+            "I_0": 1.3e21,
+            "w_0": 1e-6,
+            "tau": 30e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": -48e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 10e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-50e-6, 50e-6], [-37.1e-6, 62.9e-6]],
+            "grid_size": [4000, 4000],
+            "time_interval": [0, 500e-15]
+        }
     }
 ]

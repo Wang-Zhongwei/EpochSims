@@ -115,7 +115,6 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
             "normalization_factor": simulation.laser.normalized_amplitude,
             "smoothing_sigma": 0.0,
             "cbar_label": r"$\frac{eE_y}{m_e c\omega}$",
-            "file_prefix": "fmovie",
         },
         Quantity.Ez: {
             "norm": SymLogNorm(
@@ -129,7 +128,6 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
             "normalization_factor": simulation.laser.normalized_amplitude,
             "smoothing_sigma": 0.0,
             "cbar_label": r"$\frac{eE_z}{m_e c\omega}$",
-            "file_prefix": "fmovie",
         },
         Quantity.CHARGE_DENSITY: {
             "norm": SymLogNorm(linthresh=1e-2, linscale=1),
@@ -139,7 +137,6 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
             * elementary_charge,
             "smoothing_sigma": 0.00075 * min(simulation.domain.grid_size),
             "cbar_label": r"$\frac{\rho}{n_c e}$",
-            "file_prefix": "smovie",
         },
         Quantity.NUMBER_DENSITY: {
             "norm": LogNorm(vmin=1e-5, vmax=2e1),
@@ -148,7 +145,6 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
             "normalization_factor": simulation.laser.critical_density,
             "smoothing_sigma": 0.0,
             "cbar_label": r"$\frac{n}{n_c}$",
-            "file_prefix": "smovie",
         },
         Quantity.TEMPERATURE: {
             "norm": LogNorm(vmin=1e-5, vmax=2e1),
@@ -157,7 +153,6 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
             "normalization_factor": K_in_MeV,
             "smoothing_sigma": 0.0,
             "cbar_label": r"$T$ [MeV]",
-            "file_prefix": "smovie",
         },
         Quantity.Px: {
             "norm": SymLogNorm(
@@ -171,6 +166,5 @@ def get_plotting_parameters(simulation: Simulation) -> dict:
             "normalization_factor": normalized_momentum,
             "smoothing_sigma": 0.0,
             "cbar_label": r"$P_x\omega_0/eE$",
-            "file_prefix": "smovie",
         },
     }

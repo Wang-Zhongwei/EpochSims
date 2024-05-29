@@ -13,7 +13,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.colors import Normalize
 from scipy import ndimage
 
-from utils import Quantity, Species, timer
+from utils import Quantity, Species, get_var_name, infer_prefix, timer
 
 logger = logging.getLogger("animate_2d")
 logger.setLevel(logging.INFO)
@@ -86,12 +86,12 @@ def animate_data(
     return ani, ax, cbar
 
 
-def read_quantity_from_sdf(sdf: sdf.BlockList, quantity_name: str) -> sdf.BlockList:
+def read_quantity_from_sdf(sdf: sdf.BlockList, var_name: str) -> sdf.BlockList:
     try:
-        return sdf.__getattribute__(quantity_name)
+        return sdf.__getattribute__(var_name)
     except AttributeError:
         raise ValueError(
-            f"The specified quantity '{quantity_name}' does not exist in the sdf file."
+            f"The specified quantity '{var_name}' does not exist in the sdf file."
         )
 
 
@@ -105,16 +105,18 @@ def gaussian_filter_func(
 
 def animate_quantity(
     input_dir: str,
-    file_prefix: str,
     quantity: Quantity,
     species: Optional[Species] = None,
     **kwargs,
 ) -> Tuple[animation.FuncAnimation, Axes, Colorbar]:
 
-    quantity_name = f"{quantity.value}"
-    if species is not None:
-        quantity_name += f"_{species.value}"
-
+    var_name = get_var_name(quantity, species)
+    file_prefix = infer_prefix(input_dir, var_name)
+    if file_prefix is None:
+        raise ValueError(
+            f"Could not find a file prefix for quantity '{var_name}' in directory '{input_dir}'."
+        )
+        
     num_frames = len([f for f in os.listdir(input_dir) if f.startswith(file_prefix)])
 
     # load data
@@ -123,11 +125,11 @@ def animate_quantity(
         sdf = sh.getdata(
             os.path.join(input_dir, f"{file_prefix}_{i:04d}.sdf"), verbose=False
         )
-        quantity = read_quantity_from_sdf(sdf, quantity_name)
+        quantity = read_quantity_from_sdf(sdf, var_name)
         data.append(quantity.data)
         time_stamps.append(sdf.Header["time"])
 
-    logger.debug(f"Read {quantity_name} data from {input_dir}")
+    logger.debug(f"Read {var_name} data from {input_dir}")
 
     # get domain extent
     grid = quantity.grid.data
@@ -247,20 +249,20 @@ if __name__ == "__main__":
     import logging
     import os
 
-    from configs.metadata import get_plotting_parameters, get_simulation
     from animate_2d import animate_quantity
+    from configs.metadata import get_plotting_parameters, get_simulation
     from utils import Quantity
 
-    parser = argparse.ArgumentParser(description="Process simulation ids.")
+    parser = argparse.ArgumentParser(description="Animate 2D data from a simulation.")
     parser.add_argument("simulation_ids", nargs="+", type=str, help="The simulation ids")
     args = parser.parse_args()
     simulation_ids = args.simulation_ids
 
     default_quantities = [
-        # Quantity.Ex,
-        # Quantity.CHARGE_DENSITY,
-        # Quantity.NUMBER_DENSITY,
-        # Quantity.TEMPERATURE,
+        Quantity.Ex,
+        Quantity.CHARGE_DENSITY,
+        Quantity.NUMBER_DENSITY,
+        Quantity.TEMPERATURE,
         Quantity.Px
     ]
 
@@ -277,7 +279,6 @@ if __name__ == "__main__":
                 try:
                     ani, ax, cbar = animate_quantity(
                         simulation.data_dir_path,
-                        quantity_params["file_prefix"],
                         quantity,
                         species=species,
                         normalization_factor=quantity_params["normalization_factor"],

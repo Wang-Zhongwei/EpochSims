@@ -4,9 +4,11 @@ import sys
 import time
 from enum import Enum
 from math import cos, pi
-import sdf
+from typing import Optional
 
 import numpy as np
+import sdf
+import sdf_helper as sh
 from scipy.constants import elementary_charge, epsilon_0, m_e, speed_of_light
 
 logging.basicConfig(level=logging.INFO)
@@ -79,6 +81,29 @@ def get_tnsa_data(pmovie: sdf.BlockList) -> tuple[np.ndarray, np.ndarray]:
         raise ValueError("No TNSA weight data found")
 
     return energy.data, weight.data
+
+
+def infer_prefix(dir_path, var_name):
+    files = os.listdir(dir_path)
+    prefixes = set(
+        [
+            f.split("_")[0]
+            for f in files
+            if f.endswith(".sdf") and not f.startswith("restart")
+        ]
+    )
+    for prefix in prefixes:
+        sdf = sh.getdata(os.path.join(dir_path, f"{prefix}_0000.sdf"), verbose=False)
+        if hasattr(sdf, var_name):
+            return prefix
+    return None
+
+
+def get_var_name(quantity: Quantity, species: Optional[Species]):
+    quantity_name = f"{quantity.value}"
+    if species is not None:
+        quantity_name += f"_{species.value}"
+    return quantity_name
 
 
 class GaussianBeam:
@@ -279,3 +304,13 @@ class Simulation:
     def calc_beam_intensity_on_target(self):
         axial_distance = -self.laser.focus_x / cos(self.laser.incidence_theta)
         return self.laser.calc_intensity(axial_distance)
+
+    def get_output_timesteps(self, file_prefix: str):
+        all_files = os.listdir(self.data_dir_path)
+        matching_files = [
+            f for f in all_files if f.startswith(file_prefix) and f.endswith(".sdf")
+        ]
+        num_frames = len(matching_files)
+        return np.linspace(
+            self.domain.time_interval[0], self.domain.time_interval[1], num_frames
+        )

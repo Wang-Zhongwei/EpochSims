@@ -1,8 +1,10 @@
-import sdf_helper as sh
-import numpy as np
 import argparse
 import os
+
+import numpy as np
 import scipy.stats as stats
+import sdf_helper as sh
+
 
 def show_content(file_path, var_name=None):
     file_name = os.path.basename(file_path)

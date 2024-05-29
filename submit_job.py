@@ -1,7 +1,8 @@
+import argparse
 import os
-import argparse 
-from datetime import datetime
 import subprocess
+from datetime import datetime
+
 from configs.base_config import *
 
 parser = argparse.ArgumentParser()
