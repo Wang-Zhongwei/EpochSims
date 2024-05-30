@@ -9,7 +9,7 @@ from configs.metadata import get_plotting_parameters, get_simulation
 from utils import Plane, Quantity, Simulation, get_quantity_name, infer_prefix, read_quantity_sdf_from_sdf, timer
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("process_3d_data")
 
 @timer
 def save_frames_from_3d_data(
@@ -36,8 +36,9 @@ def save_frames_from_3d_data(
     data_2_save = np.concatenate(var_data_list, axis=0)
 
     # save data
-    out_file_name = f"{quantity_name}_{plane.value}.npy"
-    np.save(os.path.join(simulation.analysis_dir_path, out_file_name), data_2_save)
+    # todo: implement get_npy_file_name class method
+    npy_file_name = f"{quantity_name}_{plane.value}.npy"
+    np.save(os.path.join(simulation.analysis_dir_path, npy_file_name), data_2_save)
 
 
 if __name__ == "__main__":
@@ -57,6 +58,7 @@ if __name__ == "__main__":
         Plane.XY,
         Plane.YZ,
     ]
+    
     args = parser.parse_args()
     simulation_ids = args.simulation_ids
 
@@ -71,15 +73,14 @@ if __name__ == "__main__":
                 continue
             
             for species in plotting_params[quantity]["species"]:
-                var_name = get_quantity_name(quantity, species)
+                quantity_name = get_quantity_name(quantity, species)
                 for plane in default_planes:
                     try:
                         save_frames_from_3d_data(
-                            sim.data_dir_path,
+                            sim,
                             file_prefix,
-                            var_name,
+                            quantity_name,
                             plane,
-                            sim.analysis_dir_path,
                         )
                     except Exception as e:
-                        logger.error(f"Error saving frames for {quantity} and {species}: {e}")
+                        logger.error(f"Error saving frames for {quantity_name}: {e}")

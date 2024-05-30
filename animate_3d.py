@@ -1,134 +1,79 @@
+import logging
 import os
-from matplotlib.colors import LogNorm, SymLogNorm
 import numpy as np
-from utils import Plane
+from configs.metadata import get_plotting_parameters, get_simulation
+from utils import Plane, Quantity, Simulation, Species, get_plot_title, get_quantity_name
 import argparse
 from animate_2d import animate_data
 
-parser = argparse.ArgumentParser()
+logger = logging.getLogger("animate_3d")
+logger.setLevel(logging.INFO)
 
-parser.add_argument("simulation_ids", nargs="+", type=str, help="The simulation ids")
-args = parser.parse_args()
-simulation_ids = args.simulation_ids
+def load_data_from_npy(simulation: Simulation, quantity: Quantity, species: Species, plane: Plane):
+    quantity_name = get_quantity_name(quantity, species)
+    # todo: implement get_npy_file_name class method
+    npy_file_name = f"{quantity_name}_{plane.value}.npy"
+    return np.load(os.path.join(simulation.analysis_dir_path, npy_file_name), allow_pickle=True)
 
-# parse inputs
-args = parser.parse_args()
-input_dir = args.input_dir
-if args.output_dir is None:
-    output_dir = args.input_dir
-else:
-    output_dir = args.output_dir
-var_names = args.var_names
-plane = Plane[args.subset]
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
 
-# load env.py from analysis_data_dir
-# todo: automatically create env.py according to indput.deck
-env_path = os.path.join(input_dir, "env.py")
-exec(open(env_path).read())
+    parser.add_argument("simulation_ids", nargs="+", type=str, help="The simulation ids")
+    args = parser.parse_args()
+    simulation_ids = args.simulation_ids
 
-# mapping from var_name to plotting parameters
-var_params = {
-    "Electric_Field_Ex": {
-        "title": "Electric Field Ex",
-        "norm": SymLogNorm(linthresh=1e-2, linscale=1),
-        "cmap": "bwr",
-        "normalization_factor": E0,
-        "smoothing_sigma": 0.0,
-        "cbar_label": r"$\frac{eE_x}{m_e c\omega}$",
-    },
-    "Electric_Field_Ey": {
-        "title": "Electric Field Ey",
-        "norm": SymLogNorm(linthresh=1e-2, linscale=1),
-        "cmap": "bwr",
-        "normalization_factor": E0,
-        "smoothing_sigma": 0.0,
-        "cbar_label": r"$\frac{eE_y}{m_e c\omega}$",
-    },
-    "Electric_Field_Ez": {
-        "title": "Electric Field Ez",
-        "norm": SymLogNorm(linthresh=1e-2, linscale=1),
-        "cmap": "bwr",
-        "normalization_factor": E0,
-        "smoothing_sigma": 0.0,
-        "cbar_label": r"$\frac{eE_z}{m_e c\omega}$",
-    },
-    "Derived_Charge_Density": {
-        "title": "Charge Density",
-        "norm": SymLogNorm(linthresh=1e-2, linscale=1),
-        "cmap": "bwr",
-        "normalization_factor": nc * elementary_charge,
-        "smoothing_sigma": 3.0,
-        "cbar_label": r"$\frac{\rho}{n_c e}$",
-    },
-    "Derived_Number_Density_Deuteron": {
-        "title": "Deuteron Number Density",
-        "norm": LogNorm(vmin=1e-5, vmax=2e1),
-        "cmap": "viridis",
-        "normalization_factor": nc,
-        "smoothing_sigma": 0.0,
-        "cbar_label": r"$\frac{n_d}{n_c}$",
-    },
-    "Derived_Number_Density_Electron": {
-        "title": " Electron Number Density",
-        "norm": LogNorm(vmin=1e-5, vmax=2e1),
-        "cmap": "viridis",
-        "normalization_factor": nc,
-        "smoothing_sigma": 0.0,
-        "cbar_label": r"$\frac{n_e}{n_c}$",
-    },
-    "Derived_Temperature_Deuteron": {
-        "title": "Deuteron Temperature",
-        "norm": LogNorm(vmin=1e-5, vmax=2e1),
-        "cmap": "plasma",
-        "normalization_factor": K_in_MeV,
-        "smoothing_sigma": 0.0,
-        "cbar_label": r"$T_d$ [MeV]",
-    },
-    "Derived_Temperature_Electron": {
-        "title": " Electron Number Density",
-        "norm": LogNorm(vmin=1e-5, vmax=2e1),
-        "cmap": "plasma",
-        "normalization_factor": K_in_MeV,
-        "smoothing_sigma": 0.0,
-        "cbar_label": r"$T_e$ [MeV]",
-    },
-}
+    default_quantities = [
+        Quantity.Ex,
+        Quantity.CHARGE_DENSITY,
+        Quantity.NUMBER_DENSITY,
+        Quantity.TEMPERATURE,
+        Quantity.Px
+    ]
 
-# load grid data
-grid = np.load(os.path.join(input_dir, "grid.npy"), allow_pickle=True)
-if plane == Plane.XY:
-    i, j = 0, 1
-elif plane == Plane.XZ:
-    i, j = 0, 2
-else:
-    i, j = 1, 2
-extent = [grid[i][0], grid[i][-1], grid[j][0], grid[j][-1]]
+    default_planes = [
+        Plane.XY,
+        Plane.YZ,
+    ]
+    
+    for sim_id in simulation_ids:
+        sim = get_simulation(sim_id)
+        plotting_params = get_plotting_parameters(sim)
+        for quantity in default_quantities:
+            # timesteps = sim.get_output_timesteps()
+            timesteps = np.linspace(0, 500e-15, 51)
+            quantity_params = plotting_params.get(quantity)
+            for species in quantity_params["species"]:
+                for plane in default_planes:
+                    try:
+                        plot_title = get_plot_title(quantity, species, plane)  
+                        data = load_data_from_npy(sim, quantity, species, plane)
+                        extent = sim.domain.get_extent(plane)
+                        ani, ax, cbar = animate_data(
+                            data,
+                            timesteps,
+                            extent=extent,
+                            norm=quantity_params["norm"],
+                            cmap=quantity_params["cmap"],
+                            normalization_factor=quantity_params["normalization_factor"],
+                            smoothing_sigma=quantity_params["smoothing_sigma"]
+                        )
+                        
+                        cbar.set_label(quantity_params["cbar_label"])
+                        ax.set_title(plot_title)
+                        ax.set_xlabel("x [m]")
+                        ax.set_ylabel("y [m]")
+                        
+                        filename = plot_title.lower().replace(" ", "_") + "_movie.mp4"
+                        out_path = os.path.join(sim.analysis_dir_path, filename)
 
-for var_name in var_names:
-    # load data and normalize
-    data = np.load(
-        os.path.join(input_dir, f"{var_name}_{plane.value}.npy"), allow_pickle=True
-    )
-
-    # animate data
-    ani, ax, cbar = animate_data(
-        data,
-        time_stamps,
-        extent,
-        cmap=var_params[var_name]["cmap"],
-        norm=var_params[var_name]["norm"],
-        normalization_factor=var_params[var_name]["normalization_factor"],
-        smoothing_sigma=var_params[var_name]["smoothing_sigma"],
-    )
-    cbar.set_label(var_params[var_name]["cbar_label"])
-    ax.set_title(var_params[var_name]["title"])
-    ax.set_xlabel("x [um]")
-    ax.set_ylabel("y [um]")
-
-    # save animation
-    ani.save(
-        os.path.join(output_dir, f"{var_name}_{plane.value}_Movie.mp4"),
-        writer="ffmpeg",
-        fps=10,
-        dpi=300,
-    )
+                        ani.save(
+                            out_path,
+                            writer="ffmpeg",
+                            fps=5,
+                            dpi=300,
+                        )
+                        
+                        logger.info(f"Saved animation {filename} to {out_path}")
+                    except Exception as e:
+                        logger.error(f"Failed to animate due to: {e}")
+                        continue

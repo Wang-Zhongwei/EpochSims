@@ -113,6 +113,15 @@ def get_quantity_name(quantity: Quantity, species: Optional[Species]):
         quantity_name += f"_{species.value}"
     return quantity_name
 
+def get_plot_title(quantity: Quantity, species: Optional[Species] = None, plane: Optional[Plane] = None):
+    plot_title = f"{quantity.value}".replace("_", " ")
+    if species is not None:
+        plot_title = f"{species.value} " + plot_title
+    
+    if plane is not None:
+        plot_title += f" ({plane.value})"
+        
+    return plot_title
 
 class GaussianBeam:
     def __init__(
@@ -274,6 +283,14 @@ class Domain:
         elif plane == Plane.YZ:
             indices = get_indices(xs)
             return np.mean(original_data[indices, :, :], axis=0)
+    
+    def get_extent(self, plane: Plane):
+        if plane == Plane.XY:
+            return [self.boundaries[0][0], self.boundaries[0][1], self.boundaries[1][0], self.boundaries[1][1]]
+        elif plane == Plane.XZ:
+            return [self.boundaries[0][0], self.boundaries[0][1], self.boundaries[2][0], self.boundaries[2][1]]
+        elif plane == Plane.YZ:
+            return [self.boundaries[1][0], self.boundaries[1][1], self.boundaries[2][0], self.boundaries[2][1]]
 
 class Target:
     def __init__(

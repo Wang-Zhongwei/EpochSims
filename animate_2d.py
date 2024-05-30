@@ -13,7 +13,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.colors import Normalize
 from scipy import ndimage
 
-from utils import Quantity, Simulation, Species, get_quantity_name, infer_prefix, read_quantity_sdf_from_sdf, timer
+from utils import Quantity, Simulation, Species, get_plot_title, get_quantity_name, infer_prefix, read_quantity_sdf_from_sdf, timer
 
 logger = logging.getLogger("animate_2d")
 logger.setLevel(logging.INFO)
@@ -85,7 +85,6 @@ def animate_data(
 
     return ani, ax, cbar
 
-
 def gaussian_filter_func(
     data: np.ndarray, normalization_factor: float = 1.0, smoothing_sigma: float = 0.0
 ) -> np.ndarray:
@@ -96,12 +95,12 @@ def gaussian_filter_func(
 
 def animate_quantity(
     input_dir: str,
-    quantity_sdf: Quantity,
+    quantity: Quantity,
     species: Optional[Species] = None,
     **kwargs,
 ) -> Tuple[animation.FuncAnimation, Axes, Colorbar]:
 
-    quantity_name = get_quantity_name(quantity_sdf, species)
+    quantity_name = get_quantity_name(quantity, species)
     file_prefix = infer_prefix(input_dir, quantity_name)
     if file_prefix is None:
         raise ValueError(
@@ -116,14 +115,14 @@ def animate_quantity(
         sdf = sh.getdata(
             os.path.join(input_dir, f"{file_prefix}_{i:04d}.sdf"), verbose=False
         )
-        quantity_sdf = read_quantity_sdf_from_sdf(sdf, quantity_name)
-        data.append(quantity_sdf.data)
+        quantity = read_quantity_sdf_from_sdf(sdf, quantity_name)
+        data.append(quantity.data)
         time_stamps.append(sdf.Header["time"])
 
     logger.debug(f"Read {quantity_name} data from {input_dir}")
 
     # get domain extent
-    grid = quantity_sdf.grid.data
+    grid = quantity.grid.data
     extent = []
     for i in range(len(grid)):
         extent.append(grid[i][0])
@@ -263,9 +262,7 @@ if __name__ == "__main__":
         for quantity in default_quantities:
             quantity_params = plotting_params.get(quantity)
             for species in quantity_params["species"]:
-                plot_title = f"{quantity.value}".replace("_", " ")
-                if species is not None:
-                    plot_title = f"{species.value} " + plot_title
+                plot_title = get_plot_title(quantity, species)
 
                 try:
                     ani, ax, cbar = animate_quantity(
@@ -277,7 +274,6 @@ if __name__ == "__main__":
                         cmap=quantity_params["cmap"],
                         smoothing_sigma=quantity_params["smoothing_sigma"],
                     )
-                    logger.debug(f"Animation created for {plot_title}")
 
                     cbar.set_label(quantity_params["cbar_label"])
                     ax.set_title(plot_title)
