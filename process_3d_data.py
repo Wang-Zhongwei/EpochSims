@@ -6,78 +6,38 @@ import numpy as np
 import sdf_helper as sh
 
 from configs.metadata import get_plotting_parameters, get_simulation
-from utils import Plane, Quantity, get_var_name, infer_prefix, timer
+from utils import Plane, Quantity, Simulation, get_quantity_name, infer_prefix, read_quantity_sdf_from_sdf, timer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 @timer
-def save_frames(
-    input_dir: str,
+def save_frames_from_3d_data(
+    simulation: Simulation,
     file_prefix: str,
-    var_name: str,
+    quantity_name: str,
     plane: Plane,
-    output_dir: str,
 ):
-    logging.info(f"Starting to save frames for variable {quantity.value}")
-
-    # 1. Get the slice for the plane
-    # Check if grid.npy exists in the input_dir
-    grid_file_path = os.path.join(output_dir, "grid.npy")
-    if os.path.isfile(grid_file_path):
-        # Load the data from grid.npy into grid
-        grid = np.load(grid_file_path, allow_pickle=True)
-    else:
-        grid_file_prefix = infer_prefix(input_dir, "Grid_Grid")
-        if grid_file_prefix is None:
-            raise ValueError(
-                f"Could not infer file prefix for grid data in {input_dir}"
-            )
-
-        grid = sh.getdata(
-            os.path.join(input_dir, f"{grid_file_prefix}_0000.sdf"), verbose=False
-        ).Grid_Grid.data
-
-        # Save the data to grid.npy
-        np.save(grid_file_path, grid)
-
-    x_array, y_array, z_array = grid
-    slices = [slice(None), slice(None), slice(None)]
-    if plane == Plane.XY:
-        slices[2] = np.argmin(np.abs(z_array))
-    elif plane == Plane.XZ:
-        slices[1] = np.argmin(np.abs(y_array))
-    elif plane == Plane.YZ:
-        slices[0] = np.argmin(np.abs(x_array))
-    slices = tuple(slices)
-
-    # 2. Load the data
-    num_frames = len([f for f in os.listdir(input_dir) if f.startswith(file_prefix)])
-    out_file_name = f"{var_name}_{plane.value}.npy"
     var_data_list = []
+    num_frames = sim.get_num_frames(file_prefix)
     for frame in range(num_frames):
-        logger.info(f"Loading frame {frame}")
+        in_file_name= f"{file_prefix}_{frame:04d}.sdf"
         data = sh.getdata(
-            os.path.join(input_dir, f"{file_prefix}_{frame:04d}.sdf"), verbose=False
+            os.path.join(simulation.data_dir_path, in_file_name), verbose=False
         )
+        logger.info(f"Loaded {in_file_name}")
         
-        if not hasattr(data, var_name):
-            raise AttributeError(f"Variable {var_name} not found in the data")
+        quantity_sdf = read_quantity_sdf_from_sdf(data, quantity_name)
         
-        var = data.__getattribute__(var_name).data
-        del data
-        if plane:
-            var = var[slices]
-        var_data_list.append(np.expand_dims(var, axis=0))
+        planar_quantity_data = simulation.domain.get_planar_data(quantity_sdf.data, plane)
+        var_data_list.append(np.expand_dims(planar_quantity_data, axis=0))
 
     # Concatenate data along time axis
-    var_data = np.concatenate(var_data_list, axis=0)
+    data_2_save = np.concatenate(var_data_list, axis=0)
 
     # save data
-    os.makedirs(output_dir, exist_ok=True)
-    np.save(os.path.join(output_dir, out_file_name), var_data)
-
-    logger.info(f"Finished saving frames for variable {quantity.value}")
+    out_file_name = f"{quantity_name}_{plane.value}.npy"
+    np.save(os.path.join(simulation.analysis_dir_path, out_file_name), data_2_save)
 
 
 if __name__ == "__main__":
@@ -111,10 +71,10 @@ if __name__ == "__main__":
                 continue
             
             for species in plotting_params[quantity]["species"]:
-                var_name = get_var_name(quantity, species)
+                var_name = get_quantity_name(quantity, species)
                 for plane in default_planes:
                     try:
-                        save_frames(
+                        save_frames_from_3d_data(
                             sim.data_dir_path,
                             file_prefix,
                             var_name,

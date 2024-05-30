@@ -9,7 +9,8 @@ import sdf_helper as sh
 def show_content(file_path, var_name=None):
     file_name = os.path.basename(file_path)
     file_size = os.path.getsize(file_path)
-    print(f"File size of {file_name}: {file_size} bytes")
+    GB = 1 << 10
+    print(f"File size of {file_name}: {file_size / GB} GB")
 
     data = sh.getdata(file_path, verbose=False)
 

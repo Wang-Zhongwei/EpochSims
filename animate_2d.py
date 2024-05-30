@@ -13,7 +13,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.colors import Normalize
 from scipy import ndimage
 
-from utils import Quantity, Species, get_var_name, infer_prefix, timer
+from utils import Quantity, Simulation, Species, get_quantity_name, infer_prefix, read_quantity_sdf_from_sdf, timer
 
 logger = logging.getLogger("animate_2d")
 logger.setLevel(logging.INFO)
@@ -86,15 +86,6 @@ def animate_data(
     return ani, ax, cbar
 
 
-def read_quantity_from_sdf(sdf: sdf.BlockList, var_name: str) -> sdf.BlockList:
-    try:
-        return sdf.__getattribute__(var_name)
-    except AttributeError:
-        raise ValueError(
-            f"The specified quantity '{var_name}' does not exist in the sdf file."
-        )
-
-
 def gaussian_filter_func(
     data: np.ndarray, normalization_factor: float = 1.0, smoothing_sigma: float = 0.0
 ) -> np.ndarray:
@@ -105,16 +96,16 @@ def gaussian_filter_func(
 
 def animate_quantity(
     input_dir: str,
-    quantity: Quantity,
+    quantity_sdf: Quantity,
     species: Optional[Species] = None,
     **kwargs,
 ) -> Tuple[animation.FuncAnimation, Axes, Colorbar]:
 
-    var_name = get_var_name(quantity, species)
-    file_prefix = infer_prefix(input_dir, var_name)
+    quantity_name = get_quantity_name(quantity_sdf, species)
+    file_prefix = infer_prefix(input_dir, quantity_name)
     if file_prefix is None:
         raise ValueError(
-            f"Could not find a file prefix for quantity '{var_name}' in directory '{input_dir}'."
+            f"Could not find a file prefix for quantity '{quantity_name}' in directory '{input_dir}'."
         )
         
     num_frames = len([f for f in os.listdir(input_dir) if f.startswith(file_prefix)])
@@ -125,14 +116,14 @@ def animate_quantity(
         sdf = sh.getdata(
             os.path.join(input_dir, f"{file_prefix}_{i:04d}.sdf"), verbose=False
         )
-        quantity = read_quantity_from_sdf(sdf, var_name)
-        data.append(quantity.data)
+        quantity_sdf = read_quantity_sdf_from_sdf(sdf, quantity_name)
+        data.append(quantity_sdf.data)
         time_stamps.append(sdf.Header["time"])
 
-    logger.debug(f"Read {var_name} data from {input_dir}")
+    logger.debug(f"Read {quantity_name} data from {input_dir}")
 
     # get domain extent
-    grid = quantity.grid.data
+    grid = quantity_sdf.grid.data
     extent = []
     for i in range(len(grid)):
         extent.append(grid[i][0])

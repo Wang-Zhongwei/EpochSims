@@ -99,7 +99,15 @@ def infer_prefix(dir_path, var_name):
     return None
 
 
-def get_var_name(quantity: Quantity, species: Optional[Species]):
+def read_quantity_sdf_from_sdf(sdf: sdf.BlockList, quantity_name: str) -> sdf.BlockList:
+    try:
+        return sdf.__getattribute__(quantity_name)
+    except AttributeError:
+        raise ValueError(
+            f"The specified quantity '{quantity_name}' does not exist in the {sdf}."
+        )
+
+def get_quantity_name(quantity: Quantity, species: Optional[Species]):
     quantity_name = f"{quantity.value}"
     if species is not None:
         quantity_name += f"_{species.value}"
@@ -233,7 +241,39 @@ class Domain:
 
     def __repr__(self):
         return f"Domain(boundaries={self.boundaries} m, grid_size={self.grid_size}, time_interval={self.time_interval} s)"
+    
 
+    def get_grid_coordinates(self):
+        dim = len(self.grid_size)
+        coordinates = []
+        for i in range(dim):
+            n = self.grid_size[i]
+            coord = np.linspace(self.boundaries[i][0], self.boundaries[i][1], n + 1)
+            coordinates.append(coord)
+        return tuple(coordinates)
+        
+    def get_planar_data(self, original_data: np.ndarray, plane: Plane):
+        # todo: move it under quantity class in the future
+        assert original_data.ndim == 3 and len(self.grid_size) == 3
+        tol = 1e-10
+        xs, ys, zs = self.get_grid_coordinates()
+        
+        def get_indices(arr):
+            sorted_indices = np.argsort(np.abs(arr))
+            if np.abs(arr[sorted_indices[0]]) < tol:
+                return sorted_indices[:3]
+            else:
+                return sorted_indices[:2]
+        
+        if plane == Plane.XY:
+            indices = get_indices(zs)
+            return np.mean(original_data[:, :, indices], axis=2)
+        elif plane == Plane.XZ:
+            indices = get_indices(ys)
+            return np.mean(original_data[:, indices, :], axis=1)
+        elif plane == Plane.YZ:
+            indices = get_indices(xs)
+            return np.mean(original_data[indices, :, :], axis=0)
 
 class Target:
     def __init__(
@@ -304,13 +344,16 @@ class Simulation:
     def calc_beam_intensity_on_target(self):
         axial_distance = -self.laser.focus_x / cos(self.laser.incidence_theta)
         return self.laser.calc_intensity(axial_distance)
-
-    def get_output_timesteps(self, file_prefix: str):
+    
+    def get_num_frames(self, file_prefix: str):
         all_files = os.listdir(self.data_dir_path)
         matching_files = [
             f for f in all_files if f.startswith(file_prefix) and f.endswith(".sdf")
         ]
-        num_frames = len(matching_files)
+        return len(matching_files)
+    
+    def get_output_timesteps(self, file_prefix: str):
+        num_frames = self.get_num_frames(file_prefix)
         return np.linspace(
             self.domain.time_interval[0], self.domain.time_interval[1], num_frames
         )
