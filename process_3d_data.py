@@ -5,8 +5,8 @@ import os
 import numpy as np
 import sdf_helper as sh
 
-from configs.metadata import get_plotting_parameters, get_simulation
-from utils import Plane, Quantity, Simulation, get_quantity_name, get_prefix, read_quantity_sdf_from_sdf, timer
+from components import Plane, Quantity, Simulation
+from utils import get_attribute_name, get_prefix, read_quantity_sdf_from_sdf, timer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("process_3d_data")
@@ -63,8 +63,8 @@ if __name__ == "__main__":
     simulation_ids = args.simulation_ids
 
     for simulation_id in simulation_ids:
-        sim = get_simulation(simulation_id)
-        plotting_params = get_plotting_parameters(sim)
+        sim = Simulation.from_simulation_id(simulation_id)
+        plotting_params = sim.get_plotting_parameters()
         # save frames
         for quantity in default_quantities:
             try: 
@@ -74,7 +74,7 @@ if __name__ == "__main__":
                 continue
             
             for species in plotting_params[quantity]["species"]:
-                quantity_name = get_quantity_name(quantity, species)
+                quantity_name = get_attribute_name(quantity, species)
                 for plane in default_planes:
                     try:
                         save_frames_from_3d_data(

@@ -1,16 +1,18 @@
+import argparse
 import logging
 import os
+
 import numpy as np
-from configs.metadata import get_plotting_parameters, get_simulation
-from utils import Plane, Quantity, Simulation, Species, get_plot_title, get_quantity_name
-import argparse
+
 from animate_2d import animate_data
+from components import Plane, Quantity, Simulation, Species
+from utils import get_attribute_name, get_plot_title
 
 logger = logging.getLogger("animate_3d")
 logger.setLevel(logging.INFO)
 
 def load_data_from_npy(simulation: Simulation, quantity: Quantity, species: Species, plane: Plane):
-    quantity_name = get_quantity_name(quantity, species)
+    quantity_name = get_attribute_name(quantity, species)
     # todo: implement get_npy_file_name class method
     npy_file_name = f"{quantity_name}_{plane.value}.npy"
     return np.load(os.path.join(simulation.analysis_dir_path, npy_file_name), allow_pickle=True)
@@ -36,8 +38,8 @@ if __name__ == "__main__":
     ]
     
     for sim_id in simulation_ids:
-        sim = get_simulation(sim_id)
-        plotting_params = get_plotting_parameters(sim)
+        sim = Simulation.from_simulation_id(sim_id)
+        plotting_params = sim.get_plotting_parameters()
         for quantity in default_quantities:
             # timesteps = sim.get_output_timesteps()
             timesteps = np.linspace(0, 500e-15, 51)

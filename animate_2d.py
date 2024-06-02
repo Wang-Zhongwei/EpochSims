@@ -13,7 +13,9 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.colors import Normalize
 from scipy import ndimage
 
-from utils import Quantity, Species, get_plot_title, get_quantity_name, get_prefix, read_quantity_sdf_from_sdf, timer
+from components import Quantity, Simulation, Species
+from utils import (get_attribute_name, get_plot_title, get_prefix,
+                   read_quantity_sdf_from_sdf, timer)
 
 logger = logging.getLogger("animate_2d")
 logger.setLevel(logging.INFO)
@@ -100,7 +102,7 @@ def animate_quantity(
     **kwargs,
 ) -> Tuple[animation.FuncAnimation, Axes, Colorbar]:
 
-    quantity_name = get_quantity_name(quantity, species)
+    quantity_name = get_attribute_name(quantity, species)
     try:
         file_prefix = get_prefix(input_dir, quantity)
     except ValueError as e:
@@ -239,7 +241,6 @@ if __name__ == "__main__":
     import os
 
     from animate_2d import animate_quantity
-    from configs.metadata import get_plotting_parameters, get_simulation
     from utils import Quantity
 
     parser = argparse.ArgumentParser(description="Animate 2D data from a simulation.")
@@ -256,13 +257,12 @@ if __name__ == "__main__":
     ]
 
     for simulation_id in simulation_ids:
-        simulation = get_simulation(simulation_id)
-        plotting_params = get_plotting_parameters(simulation)
+        simulation = Simulation.from_simulation_id(simulation_id)
+        plotting_params = simulation.get_plotting_parameters()
         for quantity in default_quantities:
             quantity_params = plotting_params.get(quantity)
             for species in quantity_params["species"]:
                 plot_title = get_plot_title(quantity, species)
-
                 try:
                     ani, ax, cbar = animate_quantity(
                         simulation.data_dir_path,
