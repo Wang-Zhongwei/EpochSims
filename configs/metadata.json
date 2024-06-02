@@ -618,7 +618,7 @@
             "has_preplasma": true
         },
         "domain": {
-            "boundaries": [[-30e-6, 30e-6], [-9e-6, 14e-6], [-9e-6, 9e-6]],
+            "boundaries": [[-30e-6, 30e-6], [-17.574e-6, 42.427e-6], [-30e-6, 30e-6]],
             "grid_size": [2000, 2000, 2000],
             "time_interval": [0, 400e-15]
         }

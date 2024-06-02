@@ -83,20 +83,38 @@ def get_tnsa_data(pmovie: sdf.BlockList) -> tuple[np.ndarray, np.ndarray]:
     return energy.data, weight.data
 
 
-def infer_prefix(dir_path, var_name):
+def get_prefix(dir_path: str, quantity: Quantity):
     files = os.listdir(dir_path)
     prefixes = set(
-        [
-            f.split("_")[0]
-            for f in files
-            if f.endswith(".sdf") and not f.startswith("restart")
-        ]
+        f.rsplit("_", maxsplit=1)[0]
+        for f in files
+        if f.endswith(".sdf") and not f.startswith("restart")
     )
-    for prefix in prefixes:
-        sdf = sh.getdata(os.path.join(dir_path, f"{prefix}_0000.sdf"), verbose=False)
-        if hasattr(sdf, var_name):
-            return prefix
-    return None
+    # return prefixes like temperature in Derived_Temperature
+    for p in prefixes:
+        if p in quantity.value.lower():
+            data = sh.getdata(os.path.join(dir_path, f"{p}_0000.sdf"), verbose=False)
+            if hasattr(data, quantity.value):
+                return p
+    
+    # try default prefixes
+    if quantity in (Quantity.Ex, Quantity.Ey, Quantity.Ez, Quantity.Bx, Quantity.By, Quantity.Bz):
+        tentative_prefix = "fmovie"
+    elif quantity in (Quantity.TEMPERATURE, Quantity.NUMBER_DENSITY, Quantity.CHARGE_DENSITY, Quantity.AVG_PARTICLE_ENERGY, Quantity.Px):
+        tentative_prefix = "smovie"
+    
+    data = sh.getdata(os.path.join(dir_path, f"{tentative_prefix}_0000.sdf"), verbose=False)
+    if hasattr(data, quantity.value):
+        return tentative_prefix
+    
+    # brute force
+    for p in prefixes:
+        data = sh.getdata(os.path.join(dir_path, f"{p}_0000.sdf"), verbose=False)
+        if hasattr(data, quantity.value):
+            return p
+    
+    # raise exception if not found any prefix that has
+    raise ValueError(f"Prefix not found for quantity {quantity.value} in {dir_path}")
 
 
 def read_quantity_sdf_from_sdf(sdf: sdf.BlockList, quantity_name: str) -> sdf.BlockList:

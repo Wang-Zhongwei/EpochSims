@@ -13,7 +13,7 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.colors import Normalize
 from scipy import ndimage
 
-from utils import Quantity, Simulation, Species, get_plot_title, get_quantity_name, infer_prefix, read_quantity_sdf_from_sdf, timer
+from utils import Quantity, Species, get_plot_title, get_quantity_name, get_prefix, read_quantity_sdf_from_sdf, timer
 
 logger = logging.getLogger("animate_2d")
 logger.setLevel(logging.INFO)
@@ -101,11 +101,10 @@ def animate_quantity(
 ) -> Tuple[animation.FuncAnimation, Axes, Colorbar]:
 
     quantity_name = get_quantity_name(quantity, species)
-    file_prefix = infer_prefix(input_dir, quantity_name)
-    if file_prefix is None:
-        raise ValueError(
-            f"Could not find a file prefix for quantity '{quantity_name}' in directory '{input_dir}'."
-        )
+    try:
+        file_prefix = get_prefix(input_dir, quantity)
+    except ValueError as e:
+        logger.error(e)
         
     num_frames = len([f for f in os.listdir(input_dir) if f.startswith(file_prefix)])
 

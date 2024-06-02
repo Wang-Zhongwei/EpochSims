@@ -6,7 +6,7 @@ import numpy as np
 import sdf_helper as sh
 
 from configs.metadata import get_plotting_parameters, get_simulation
-from utils import Plane, Quantity, Simulation, get_quantity_name, infer_prefix, read_quantity_sdf_from_sdf, timer
+from utils import Plane, Quantity, Simulation, get_quantity_name, get_prefix, read_quantity_sdf_from_sdf, timer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("process_3d_data")
@@ -67,9 +67,10 @@ if __name__ == "__main__":
         plotting_params = get_plotting_parameters(sim)
         # save frames
         for quantity in default_quantities:
-            file_prefix = infer_prefix(sim.data_dir_path, quantity.value)
-            if file_prefix is None:
-                logger.error(f"Could not infer file prefix for {quantity.value}. Skipped. ")
+            try: 
+                file_prefix = get_prefix(sim.data_dir_path, quantity)
+            except ValueError as e:
+                logger.error(e)
                 continue
             
             for species in plotting_params[quantity]["species"]:
