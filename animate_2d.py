@@ -14,8 +14,7 @@ from matplotlib.colors import Normalize
 from scipy import ndimage
 
 from components import Quantity, Simulation, Species
-from utils import (get_attribute_name, get_plot_title, get_prefix,
-                   read_quantity_sdf_from_sdf, timer)
+from utils import read_quantity_sdf_from_sdf, timer
 
 logger = logging.getLogger("animate_2d")
 logger.setLevel(logging.INFO)
@@ -102,9 +101,9 @@ def animate_quantity(
     **kwargs,
 ) -> Tuple[animation.FuncAnimation, Axes, Colorbar]:
 
-    quantity_name = get_attribute_name(quantity, species)
+    quantity_name = quantity.get_attribute_name(species)
     try:
-        file_prefix = get_prefix(input_dir, quantity)
+        file_prefix = quantity.get_prefix(input_dir)
     except ValueError as e:
         logger.error(e)
         
@@ -262,7 +261,7 @@ if __name__ == "__main__":
         for quantity in default_quantities:
             quantity_params = plotting_params.get(quantity)
             for species in quantity_params["species"]:
-                plot_title = get_plot_title(quantity, species)
+                plot_title = quantity.get_plot_title(species)
                 try:
                     ani, ax, cbar = animate_quantity(
                         simulation.data_dir_path,

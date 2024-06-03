@@ -8,13 +8,17 @@ from matplotlib.colors import LogNorm, SymLogNorm
 from numpy import cos, pi
 from scipy.constants import elementary_charge
 
+
 from configs.base_config import ANALYSIS_BASE_PATH, OUTPUT_BASE_PATH, REPO_PATH
 from configs.metadata import get_simulation_metadata, load_metadata
 
 from .domain import Domain
-from .enums import Quantity, Species
+from .enums import Plane, Quantity, Species
 from .laser import GaussianBeam
 from .target import Target
+from .data import Movie
+
+import sdf_helper as sh
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +109,10 @@ class Simulation:
             domain=domain,
             target=target,
         )
+    
+    @property
+    def dimension(self):
+        return len(self.domain.boundaries)
     
     def get_plotting_parameters(self) -> dict:
         # todo: modify norm based on simulation configs
@@ -220,4 +228,41 @@ class Simulation:
         return np.linspace(
             self.domain.time_interval[0], self.domain.time_interval[1], num_frames
         )
+    
+    def load_data_from_npy(self, quantity: Quantity, species: Species, plane: Plane):
+        npy_file_name = quantity.get_npy_file_name(species, plane)
+        return np.load(os.path.join(self.analysis_dir_path, npy_file_name), allow_pickle=True)
+    
+    def load_movie(self, quantity: Quantity, species: Species = None, plane: Plane = None) -> Movie:
+        
+        if self.dimension == 2:
+            data = []
+            quantity_name = quantity.get_attribute_name(species)
+            file_prefix = quantity.get_prefix(self.data_dir_path)
+            num_frames = self.get_num_frames(file_prefix)
+            for i in range(num_frames):
+                sdf = sh.getdata(
+                    os.path.join(self.data_dir_path, f"{file_prefix}_{i:04d}.sdf"),
+                    verbose=False,
+                )
+                d = getattr(sdf, quantity_name).data
+                data.append(d)
+            data = np.array(data)
+        else:
+            data = self.load_data_from_npy(quantity, species, plane)
+        
+        return Movie(data, self.get_extent(plane), self.get_output_timesteps(file_prefix))
+        
+    def load_frame_data(self, frame_number: int, quantity: Quantity, species: Species = None, plane: Plane = None) -> np.ndarray:
+        if self.dimension == 2:
+            attr_name = quantity.get_attribute_name(species)
+            file_prefix = quantity.get_prefix(self.data_dir_path)
+            sdf = sh.getdata(
+                os.path.join(self.data_dir_path, f"{file_prefix}_{frame_number:04d}.sdf"),
+                verbose=False,
+            )
+            return getattr(sdf, attr_name).data
+        else:
+            data = self.load_data_from_npy(quantity, species, plane)
+            return data[frame_number]
 
