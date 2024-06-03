@@ -1,15 +1,14 @@
-
 from matplotlib import animation, pyplot as plt
 from matplotlib.colors import Normalize
 import multiprocessing as mp
 import numpy as np
 from scipy import ndimage
 
-def gaussian_filter_func(
-    data: np.ndarray, smoothing_sigma: float = 0.0
-) -> np.ndarray:
+
+def gaussian_filter_func(data: np.ndarray, smoothing_sigma: float = 0.0) -> np.ndarray:
     data = ndimage.gaussian_filter(data, sigma=smoothing_sigma)
     return data
+
 
 class Movie:
     def __init__(self, data: np.ndarray, extent: list, timesteps: np.ndarray):
@@ -17,8 +16,15 @@ class Movie:
         self.data = data
         self.extent = extent
         self.timesteps = timesteps
-    
-    def animate(self, norm=Normalize(), cmap="viridis", normalization_factor=1.0, smoothing_sigma=0.0, **kwargs):
+
+    def animate(
+        self,
+        norm=Normalize(),
+        cmap="viridis",
+        normalization_factor=1.0,
+        smoothing_sigma=0.0,
+        **kwargs,
+    ):
         # todo: implement animate
         data = self.data
         if smoothing_sigma > 0:

@@ -10,7 +10,6 @@ from components import Quantity, Species, Plane
 logging.basicConfig(level=logging.INFO)
 
 
-
 def timer(func):
     def wrapper(*args, **kwargs):
         start_time = time.time()  # Start time before function execution

@@ -1,12 +1,11 @@
-
 import logging
 import os
 import sys
 
 import numpy as np
 from matplotlib.colors import LogNorm, SymLogNorm
-from numpy import cos, pi
-from scipy.constants import elementary_charge
+from numpy import cos, pi, sqrt
+from scipy.constants import elementary_charge, m_e, speed_of_light, Boltzmann as k_B
 
 
 from configs.base_config import ANALYSIS_BASE_PATH, OUTPUT_BASE_PATH, REPO_PATH
@@ -58,7 +57,7 @@ class Simulation:
 
     def __repr__(self):
         return f"Simulation(simulation_id='{self.simulation_id}', laser={repr(self.laser)}, domain={repr(self.domain)}, target={repr(self.target)})"
-    
+
     @classmethod
     def from_simulation_id(cls, simulation_id: str) -> "Simulation":
         metadata = load_metadata(os.path.join(REPO_PATH, "configs", "metadata.json"))
@@ -109,11 +108,11 @@ class Simulation:
             domain=domain,
             target=target,
         )
-    
+
     @property
     def dimension(self):
         return len(self.domain.boundaries)
-    
+
     def get_plotting_parameters(self) -> dict:
         # todo: modify norm based on simulation configs
         K_in_MeV = 11604518122
@@ -124,6 +123,11 @@ class Simulation:
             self.laser.peak_electric_field
             * elementary_charge
             / self.laser.angular_frequency
+        )
+        pondermotive_temperature = (
+            m_e
+            * speed_of_light**2
+            * (sqrt(1 + self.calc_beam_intensity_on_target() * (self.laser.lambda_0 * 1e6)**2 / 1.37e18) - 1) / k_B
         )
         return {
             Quantity.Ex: {
@@ -169,13 +173,12 @@ class Simulation:
                 "norm": SymLogNorm(linthresh=1e-2, linscale=1),
                 "cmap": "bwr",
                 "species": [None],
-                "normalization_factor": self.laser.critical_density
-                * elementary_charge,
+                "normalization_factor": self.laser.critical_density * elementary_charge,
                 "smoothing_sigma": 0.00075 * min(self.domain.grid_size),
                 "cbar_label": r"$\frac{\rho}{n_c e}$",
             },
             Quantity.NUMBER_DENSITY: {
-                "norm": LogNorm(vmin=1e-3, vmax=1e2),
+                "norm": LogNorm(vmin=1e-2, vmax=1e2),
                 "cmap": "viridis",
                 "species": [Species.ELECTRON, Species.DEUTERON, Species.HYDROGEN],
                 "normalization_factor": self.laser.critical_density,
@@ -183,20 +186,16 @@ class Simulation:
                 "cbar_label": r"$\frac{n}{n_c}$",
             },
             Quantity.TEMPERATURE: {
-                "norm": LogNorm(vmin=1e-3, vmax=1e2),
+                "norm": LogNorm(vmin=1e-2, vmax=1e1),
                 "cmap": "plasma",
-                "species": [Species.ELECTRON, Species.DEUTERON, Species.HYDROGEN],
-                "normalization_factor": K_in_MeV,
+                "species": [Species.ELECTRON],
+                "normalization_factor": pondermotive_temperature,
                 "smoothing_sigma": 0.0,
                 "cbar_label": r"$T$ [MeV]",
+                # "cbar_label": r"$T/T_p$",
             },
             Quantity.Px: {
-                "norm": SymLogNorm(
-                    linthresh=1e-2,
-                    linscale=1,
-                    vmin=-1000,
-                    vmax=1000
-                ),
+                "norm": SymLogNorm(linthresh=1e-2, linscale=1, vmin=-1000, vmax=1000),
                 "cmap": "bwr",
                 "species": [Species.DEUTERON],
                 "normalization_factor": normalized_momentum,
@@ -215,25 +214,29 @@ class Simulation:
     def calc_beam_intensity_on_target(self):
         axial_distance = -self.laser.focus_x / cos(self.laser.incidence_theta)
         return self.laser.calc_intensity(axial_distance)
-    
+
     def get_num_frames(self, file_prefix: str):
         all_files = os.listdir(self.data_dir_path)
         matching_files = [
             f for f in all_files if f.startswith(file_prefix) and f.endswith(".sdf")
         ]
         return len(matching_files)
-    
+
     def get_output_timesteps(self, file_prefix: str):
         num_frames = self.get_num_frames(file_prefix)
         return np.linspace(
             self.domain.time_interval[0], self.domain.time_interval[1], num_frames
         )
-    
+
     def load_data_from_npy(self, quantity: Quantity, species: Species, plane: Plane):
         npy_file_name = quantity.get_npy_file_name(species, plane)
-        return np.load(os.path.join(self.analysis_dir_path, npy_file_name), allow_pickle=True)
-    
-    def load_movie(self, quantity: Quantity, species: Species = None, plane: Plane = None) -> Movie:
+        return np.load(
+            os.path.join(self.analysis_dir_path, npy_file_name), allow_pickle=True
+        )
+
+    def load_movie(
+        self, quantity: Quantity, species: Species = None, plane: Plane = None
+    ) -> Movie:
         file_prefix = quantity.get_prefix(self.data_dir_path)
         if self.dimension == 2:
             data = []
@@ -249,19 +252,29 @@ class Simulation:
             data = np.array(data)
         else:
             data = self.load_data_from_npy(quantity, species, plane)
-        
-        return Movie(data, self.domain.get_extent(plane), self.get_output_timesteps(file_prefix))
-        
-    def load_frame_data(self, frame_number: int, quantity: Quantity, species: Species = None, plane: Plane = None) -> np.ndarray:
+
+        logger.info(f"Loaded movie data for {quantity.value}")
+        return Movie(
+            data, self.domain.get_extent(plane), self.get_output_timesteps(file_prefix)
+        )
+
+    def load_frame_data(
+        self,
+        frame_number: int,
+        quantity: Quantity,
+        species: Species = None,
+        plane: Plane = None,
+    ) -> np.ndarray:
         if self.dimension == 2:
             attr_name = quantity.get_attribute_name(species)
             file_prefix = quantity.get_prefix(self.data_dir_path)
             sdf = sh.getdata(
-                os.path.join(self.data_dir_path, f"{file_prefix}_{frame_number:04d}.sdf"),
+                os.path.join(
+                    self.data_dir_path, f"{file_prefix}_{frame_number:04d}.sdf"
+                ),
                 verbose=False,
             )
             return getattr(sdf, attr_name).data
         else:
             data = self.load_data_from_npy(quantity, species, plane)
             return data[frame_number]
-

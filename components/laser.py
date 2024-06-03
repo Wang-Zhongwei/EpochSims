@@ -1,4 +1,3 @@
-
 import numpy as np
 from numpy import pi
 from scipy.constants import elementary_charge, epsilon_0, m_e, speed_of_light

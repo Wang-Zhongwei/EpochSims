@@ -14,11 +14,11 @@ args = parser.parse_args()
 simulation_ids = args.simulation_ids
 
 default_quantities = [
-    # Quantity.Ex,
+    Quantity.Ex,
     Quantity.CHARGE_DENSITY,
     Quantity.NUMBER_DENSITY,
     Quantity.TEMPERATURE,
-    Quantity.Px
+    Quantity.Px,
 ]
 
 for sim_id in simulation_ids:
@@ -31,24 +31,23 @@ for sim_id in simulation_ids:
                 default_planes = [None]
             else:
                 default_planes = [Plane.XY, Plane.YZ]
-                
+
             for plane in default_planes:
                 try:
                     plot_title = quantity.get_plot_title(species, plane)
                     movie = sim.load_movie(quantity, species, plane)
-
                     ani, ax, cbar = movie.animate(
                         norm=quantity_params["norm"],
                         cmap=quantity_params["cmap"],
                         normalization_factor=quantity_params["normalization_factor"],
-                        smoothing_sigma=quantity_params["smoothing_sigma"]
+                        smoothing_sigma=quantity_params["smoothing_sigma"],
                     )
-                    
+
                     cbar.set_label(quantity_params["cbar_label"])
                     ax.set_title(plot_title)
                     ax.set_xlabel("x [m]")
                     ax.set_ylabel("y [m]")
-                    
+
                     filename = quantity.get_media_file_name(species, plane)
                     out_path = os.path.join(sim.analysis_dir_path, filename)
 
@@ -58,9 +57,9 @@ for sim_id in simulation_ids:
                         fps=5,
                         dpi=300,
                     )
-                    
+
                     logger.info(f"Saved animation {filename} to {out_path}")
-                        
+
                 except Exception as e:
                     logger.error(f"Failed to animate due to: {e}")
                     continue
