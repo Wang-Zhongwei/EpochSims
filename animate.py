@@ -14,7 +14,7 @@ args = parser.parse_args()
 simulation_ids = args.simulation_ids
 
 default_quantities = [
-    Quantity.Ex,
+    # Quantity.Ex,
     Quantity.CHARGE_DENSITY,
     Quantity.NUMBER_DENSITY,
     Quantity.TEMPERATURE,

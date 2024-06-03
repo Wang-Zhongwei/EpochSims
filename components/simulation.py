@@ -175,7 +175,7 @@ class Simulation:
                 "cbar_label": r"$\frac{\rho}{n_c e}$",
             },
             Quantity.NUMBER_DENSITY: {
-                "norm": LogNorm(vmin=1e-5, vmax=2e1),
+                "norm": LogNorm(vmin=1e-3, vmax=1e2),
                 "cmap": "viridis",
                 "species": [Species.ELECTRON, Species.DEUTERON, Species.HYDROGEN],
                 "normalization_factor": self.laser.critical_density,
@@ -183,7 +183,7 @@ class Simulation:
                 "cbar_label": r"$\frac{n}{n_c}$",
             },
             Quantity.TEMPERATURE: {
-                "norm": LogNorm(vmin=1e-5, vmax=2e1),
+                "norm": LogNorm(vmin=1e-3, vmax=1e2),
                 "cmap": "plasma",
                 "species": [Species.ELECTRON, Species.DEUTERON, Species.HYDROGEN],
                 "normalization_factor": K_in_MeV,

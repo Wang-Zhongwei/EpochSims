@@ -6,9 +6,8 @@ import numpy as np
 from scipy import ndimage
 
 def gaussian_filter_func(
-    data: np.ndarray, normalization_factor: float = 1.0, smoothing_sigma: float = 0.0
+    data: np.ndarray, smoothing_sigma: float = 0.0
 ) -> np.ndarray:
-    data /= normalization_factor
     data = ndimage.gaussian_filter(data, sigma=smoothing_sigma)
     return data
 
@@ -26,12 +25,12 @@ class Movie:
             with mp.Pool(mp.cpu_count()) as pool:
                 data = pool.starmap(
                     gaussian_filter_func,
-                    [(d, normalization_factor, smoothing_sigma) for d in data],
+                    [(d, smoothing_sigma) for d in data],
                 )
 
         fig, ax = plt.subplots()
         img = ax.imshow(
-            data[0].T,
+            data[0].T / normalization_factor,
             extent=self.extent,
             origin="lower",
             interpolation="nearest",
@@ -52,7 +51,7 @@ class Movie:
 
         # Update function for animation
         def update(i):
-            img.set_array(data[i].T)
+            img.set_array(data[i].T / normalization_factor)
 
             if self.timesteps is not None:
                 time_text.set_text(f"t = {self.timesteps[i]:.2e} s")
