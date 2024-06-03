@@ -234,11 +234,10 @@ class Simulation:
         return np.load(os.path.join(self.analysis_dir_path, npy_file_name), allow_pickle=True)
     
     def load_movie(self, quantity: Quantity, species: Species = None, plane: Plane = None) -> Movie:
-        
+        file_prefix = quantity.get_prefix(self.data_dir_path)
         if self.dimension == 2:
             data = []
             quantity_name = quantity.get_attribute_name(species)
-            file_prefix = quantity.get_prefix(self.data_dir_path)
             num_frames = self.get_num_frames(file_prefix)
             for i in range(num_frames):
                 sdf = sh.getdata(
@@ -251,7 +250,7 @@ class Simulation:
         else:
             data = self.load_data_from_npy(quantity, species, plane)
         
-        return Movie(data, self.get_extent(plane), self.get_output_timesteps(file_prefix))
+        return Movie(data, self.domain.get_extent(plane), self.get_output_timesteps(file_prefix))
         
     def load_frame_data(self, frame_number: int, quantity: Quantity, species: Species = None, plane: Plane = None) -> np.ndarray:
         if self.dimension == 2:

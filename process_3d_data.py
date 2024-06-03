@@ -6,7 +6,7 @@ import numpy as np
 import sdf_helper as sh
 
 from components import Plane, Quantity, Simulation
-from utils import get_attribute_name, get_prefix, read_quantity_sdf_from_sdf, timer
+from utils import read_quantity_sdf_from_sdf, timer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("process_3d_data")
@@ -68,13 +68,13 @@ if __name__ == "__main__":
         # save frames
         for quantity in default_quantities:
             try: 
-                file_prefix = get_prefix(sim.data_dir_path, quantity)
+                file_prefix = quantity.get_prefix(sim.data_dir_path)
             except ValueError as e:
                 logger.error(e)
                 continue
             
             for species in plotting_params[quantity]["species"]:
-                quantity_name = get_attribute_name(quantity, species)
+                quantity_name = quantity.get_attribute_name(species)
                 for plane in default_planes:
                     try:
                         save_frames_from_3d_data(

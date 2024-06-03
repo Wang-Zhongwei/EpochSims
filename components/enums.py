@@ -59,7 +59,7 @@ class Quantity(Enum):
         )
         # return prefixes like temperature in Derived_Temperature
         for p in prefixes:
-            if p in self.value.lower():
+            if p in self.value.lower().replace("_", " "):
                 data = sh.getdata(os.path.join(data_dir_path, f"{p}_0000.sdf"), verbose=False)
                 if hasattr(data, self.value):
                     return p
@@ -86,3 +86,7 @@ class Quantity(Enum):
     def get_npy_file_name(self, species: Species, plane: Plane):
         quantity_name = self.get_attribute_name(species)
         return f"{quantity_name}_{plane.value}.npy"
+    
+    def get_media_file_name(self, species: Species = None, plane: Plane = None):
+        return self.get_plot_title(species, plane).lower().replace(" ", "_") + "_movie.mp4"
+    

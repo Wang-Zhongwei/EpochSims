@@ -1,7 +1,16 @@
 
+from matplotlib import animation, pyplot as plt
 from matplotlib.colors import Normalize
+import multiprocessing as mp
 import numpy as np
+from scipy import ndimage
 
+def gaussian_filter_func(
+    data: np.ndarray, normalization_factor: float = 1.0, smoothing_sigma: float = 0.0
+) -> np.ndarray:
+    data /= normalization_factor
+    data = ndimage.gaussian_filter(data, sigma=smoothing_sigma)
+    return data
 
 class Movie:
     def __init__(self, data: np.ndarray, extent: list, timesteps: np.ndarray):
@@ -10,6 +19,46 @@ class Movie:
         self.extent = extent
         self.timesteps = timesteps
     
-    def animate(self, norm=Normalize(), cmap="viridis", normalization_factor=1.0, smoothing_sigma=0.0):
+    def animate(self, norm=Normalize(), cmap="viridis", normalization_factor=1.0, smoothing_sigma=0.0, **kwargs):
         # todo: implement animate
-        pass
+        data = self.data
+        if smoothing_sigma > 0:
+            with mp.Pool(mp.cpu_count()) as pool:
+                data = pool.starmap(
+                    gaussian_filter_func,
+                    [(d, normalization_factor, smoothing_sigma) for d in data],
+                )
+
+        fig, ax = plt.subplots()
+        img = ax.imshow(
+            data[0].T,
+            extent=self.extent,
+            origin="lower",
+            interpolation="nearest",
+            norm=norm,
+            cmap=cmap,
+        )
+        cbar = fig.colorbar(img)
+
+        time_text = ax.text(
+            0.05,
+            0.95,
+            "",
+            transform=ax.transAxes,
+            fontsize=12,
+            color="white",
+            backgroundcolor="black",
+        )
+
+        # Update function for animation
+        def update(i):
+            img.set_array(data[i].T)
+
+            if self.timesteps is not None:
+                time_text.set_text(f"t = {self.timesteps[i]:.2e} s")
+            else:
+                time_text.set_text(f"Frame: {i}")
+
+        ani = animation.FuncAnimation(fig, update, frames=range(len(data)), **kwargs)
+
+        return ani, ax, cbar
