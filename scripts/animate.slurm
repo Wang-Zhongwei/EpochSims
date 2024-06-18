@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --time=0:30:00
-#SBATCH --nodes=1 --ntasks-per-node=40
+#SBATCH --nodes=1 --ntasks-per-node=2
 
 #SBATCH --job-name=animate
 #SBATCH --account=PAS0035

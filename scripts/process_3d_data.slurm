@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=01:30:00
-#SBATCH --nodes=1 --ntasks-per-node=10
-#SBATCH --mem=200GB
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --mem=300GB
 
 #SBATCH --job-name=process_3d_data
 #SBATCH --account=PAS0035
