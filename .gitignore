@@ -1,7 +1,7 @@
 *cache*
 *test*
 temp
-logs/*
-decks/*
+logs/**
+decks/**
 analysis/*
 .vscode
