@@ -24,6 +24,7 @@ class Quantity(Enum):
     CHARGE_DENSITY = "Derived_Charge_Density"
     AVG_PARTICLE_ENERGY = "Derived_Average_Particle_Energy"
     Ex = "Electric_Field_Ex"
+    Ex_XY = "Electric_Field_Ex_Core_XY_plane"
     Ey = "Electric_Field_Ey"
     Ez = "Electric_Field_Ez"
     Bx = "Magnetic_Field_Bx"

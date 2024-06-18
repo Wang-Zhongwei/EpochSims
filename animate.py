@@ -4,21 +4,20 @@ import os
 
 from components import Plane, Quantity, Simulation
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("animate")
-logger.setLevel(logging.INFO)
 
 parser = argparse.ArgumentParser()
-
 parser.add_argument("simulation_ids", nargs="+", type=str, help="The simulation ids")
 args = parser.parse_args()
 simulation_ids = args.simulation_ids
 
 default_quantities = [
-    Quantity.Ex,
+    # Quantity.Ex,
     Quantity.CHARGE_DENSITY,
     Quantity.NUMBER_DENSITY,
     Quantity.TEMPERATURE,
-    Quantity.Px,
+    # Quantity.Px,
 ]
 
 for sim_id in simulation_ids:
@@ -57,7 +56,6 @@ for sim_id in simulation_ids:
                         fps=5,
                         dpi=300,
                     )
-
                     logger.info(f"Saved animation {filename} to {out_path}")
 
                 except Exception as e:

@@ -57,6 +57,9 @@ class Simulation:
 
     def __repr__(self):
         return f"Simulation(simulation_id='{self.simulation_id}', laser={repr(self.laser)}, domain={repr(self.domain)}, target={repr(self.target)})"
+    
+    def __str__(self):
+        return f"Simulation with id {self.simulation_id}"
 
     @classmethod
     def from_simulation_id(cls, simulation_id: str) -> "Simulation":
@@ -183,6 +186,7 @@ class Simulation:
                 "species": [Species.ELECTRON, Species.DEUTERON, Species.HYDROGEN],
                 "normalization_factor": self.laser.critical_density,
                 "smoothing_sigma": 0.0,
+                # "smoothing_sigma": 0.001 * min(self.domain.grid_size),
                 "cbar_label": r"$\frac{n}{n_c}$",
             },
             Quantity.TEMPERATURE: {

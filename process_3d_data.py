@@ -11,7 +11,7 @@ from utils import read_quantity_sdf_from_sdf, timer
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("process_3d_data")
 
-
+# todo: solve save Ex memory exceed problem
 @timer
 def save_frames_from_3d_data(
     simulation: Simulation,
@@ -57,7 +57,6 @@ if __name__ == "__main__":
         Quantity.CHARGE_DENSITY,
         Quantity.NUMBER_DENSITY,
         Quantity.TEMPERATURE,
-        Quantity.Ex,
     ]
 
     default_planes = [
@@ -68,20 +67,30 @@ if __name__ == "__main__":
     args = parser.parse_args()
     simulation_ids = args.simulation_ids
 
+    # for simulation_id in simulation_ids:
+    #     sim = Simulation.from_simulation_id(simulation_id)
+    #     plotting_params = sim.get_plotting_parameters()
+    #     for quantity in default_quantities:
+    #         for species in plotting_params[quantity]["species"]:
+    #             for plane in default_planes:
+    #                 try:
+    #                     save_frames_from_3d_data(
+    #                         sim,
+    #                         quantity,
+    #                         species,
+    #                         plane,
+    #                     )
+    #                 except Exception as e:
+    #                     logger.error(
+    #                         f"Error saving frames for {quantity.value} {species.value} {plane.value}: {e}"
+    #                     )
+        
+    # save Ex data
     for simulation_id in simulation_ids:
         sim = Simulation.from_simulation_id(simulation_id)
-        plotting_params = sim.get_plotting_parameters()
-        for quantity in default_quantities:
-            for species in plotting_params[quantity]["species"]:
-                for plane in default_planes:
-                    try:
-                        save_frames_from_3d_data(
-                            sim,
-                            quantity,
-                            species,
-                            plane,
-                        )
-                    except Exception as e:
-                        logger.error(
-                            f"Error saving frames for {quantity.value} {species.value} {plane.value}: {e}"
-                        )
+        fmovie = sh.getdata(os.path.join(sim.data_dir_path, "fmovie_0000.sdf"), verbose=False)
+        if hasattr(fmovie, Quantity.Ex_XY.value):
+            quantity = Quantity.Ex_XY
+        else:
+            quantity = Quantity.Ex
+        save_frames_from_3d_data(sim, quantity, None, Plane.XY)

@@ -24,7 +24,7 @@ os.makedirs(ouput_dir_path, exist_ok=True)
 os.makedirs(analysis_dir_path, exist_ok=True)
 
 # load template.sh
-with open("template.sh", "r") as f:
+with open("scripts/template.slurm", "r") as f:
     template = f.read()
     # replace environment variables
     template = template.replace("${ACCOUNT_NAME}", ACCOUNT_NAME)
@@ -44,8 +44,8 @@ with open("template.sh", "r") as f:
         template = template.replace("${EXECUTABLE_PATH}", EXECUTABLE_PATH_2D)
 
     # save template to output_dir
-    with open(f"{ouput_dir_path}/{job_name}.sh", "w") as f:
+    with open(f"{ouput_dir_path}/{job_name}.slurm", "w") as f:
         f.write(template)
 
 # submit job
-subprocess.run(f"sbatch {ouput_dir_path}/{job_name}.sh", shell=True)
+subprocess.run(f"sbatch {ouput_dir_path}/{job_name}.slurm", shell=True)

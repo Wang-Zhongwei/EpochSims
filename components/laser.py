@@ -80,6 +80,10 @@ class GaussianBeam:
     @property
     def normalized_amplitude(self):
         return m_e * speed_of_light * self.angular_frequency / elementary_charge
+    
+    @property
+    def a0(self):
+        return self.peak_electric_field / self.normalized_amplitude
 
     def calc_beam_radius(self, z: float):
         """

@@ -7,6 +7,8 @@
 #SBATCH --error=${OUTPUT_DIR_PATH}/${JOB_NAME}.err
 #PBS -m abe
 
+module load mvapich2/2.3.6
+
 echo -e ${OUTPUT_DIR_PATH} > ${OUTPUT_DIR_PATH}/USE_DATA_DIRECTORY
 # save the input deck to the output directory
 if [ ! -f "decks/${EXP_NAME}/${DECK_NAME}.deck" ]; then
