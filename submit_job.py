@@ -2,6 +2,8 @@ import argparse
 import os
 import subprocess
 from datetime import datetime
+import shutil
+import sys
 
 from configs.base_config import *
 
@@ -22,6 +24,18 @@ analysis_dir_path = os.path.join(ANALYSIS_BASE_PATH, args.experiment_name, job_n
 
 os.makedirs(ouput_dir_path, exist_ok=True)
 os.makedirs(analysis_dir_path, exist_ok=True)
+
+# copy deck to output dir
+deck_name = args.deck_name
+if not deck_name.endswith(".deck"):
+    deck_name += ".deck"
+
+deck_path = f"decks/{args.experiment_name}/{deck_name}"
+if not os.path.exists(deck_path):
+    print(f"{deck_name} does not exist")
+    sys.exit(1)
+    
+shutil.copy(deck_path, ouput_dir_path + "/input.deck")
 
 # load template.sh
 with open("scripts/template.slurm", "r") as f:

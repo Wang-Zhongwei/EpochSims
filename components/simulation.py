@@ -117,7 +117,6 @@ class Simulation:
         return len(self.domain.boundaries)
 
     def get_plotting_parameters(self) -> dict:
-        # todo: modify norm based on simulation configs
         K_in_MeV = 11604518122
         normalized_peak_electric_field = (
             self.laser.peak_electric_field / self.laser.normalized_amplitude

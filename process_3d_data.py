@@ -8,10 +8,13 @@ import sdf_helper as sh
 from components import Plane, Quantity, Simulation, Species
 from utils import read_quantity_sdf_from_sdf, timer
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s (%(levelname)s): %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 logger = logging.getLogger("process_3d_data")
 
-# todo: solve save Ex memory exceed problem
 @timer
 def save_frames_from_3d_data(
     simulation: Simulation,
@@ -31,10 +34,14 @@ def save_frames_from_3d_data(
 
         attr_name = quantity.get_attribute_name(species)
         quantity_sdf = read_quantity_sdf_from_sdf(data, attr_name)
+        
+        logger.debug(f"Shape of the quantity_sdf: {quantity_sdf.data.shape}")
 
         planar_quantity_data = simulation.domain.get_planar_data(
             quantity_sdf.data, plane
         )
+        
+        logger.debug(f"Shape of the planar_quantity_data: {planar_quantity_data.shape}")
         data_list.append(np.expand_dims(planar_quantity_data, axis=0))
 
     # Concatenate data along time axis
@@ -67,30 +74,30 @@ if __name__ == "__main__":
     args = parser.parse_args()
     simulation_ids = args.simulation_ids
 
-    # for simulation_id in simulation_ids:
-    #     sim = Simulation.from_simulation_id(simulation_id)
-    #     plotting_params = sim.get_plotting_parameters()
-    #     for quantity in default_quantities:
-    #         for species in plotting_params[quantity]["species"]:
-    #             for plane in default_planes:
-    #                 try:
-    #                     save_frames_from_3d_data(
-    #                         sim,
-    #                         quantity,
-    #                         species,
-    #                         plane,
-    #                     )
-    #                 except Exception as e:
-    #                     logger.error(
-    #                         f"Error saving frames for {quantity.value} {species.value} {plane.value}: {e}"
-    #                     )
-        
-    # save Ex data
     for simulation_id in simulation_ids:
         sim = Simulation.from_simulation_id(simulation_id)
-        fmovie = sh.getdata(os.path.join(sim.data_dir_path, "fmovie_0000.sdf"), verbose=False)
-        if hasattr(fmovie, Quantity.Ex_XY.value):
-            quantity = Quantity.Ex_XY
-        else:
-            quantity = Quantity.Ex
-        save_frames_from_3d_data(sim, quantity, None, Plane.XY)
+        plotting_params = sim.get_plotting_parameters()
+        for quantity in default_quantities:
+            for species in plotting_params[quantity]["species"]:
+                for plane in default_planes:
+                    try:
+                        save_frames_from_3d_data(
+                            sim,
+                            quantity,
+                            species,
+                            plane,
+                        )
+                    except Exception as e:
+                        logger.error(
+                            f"Error saving frames for {quantity.value} {species.value} {plane.value}: {e}"
+                        )
+        
+    # save Ex data
+    # for simulation_id in simulation_ids:
+    #     sim = Simulation.from_simulation_id(simulation_id)
+    #     fmovie = sh.getdata(os.path.join(sim.data_dir_path, "fmovie_0000.sdf"), verbose=False)
+    #     if hasattr(fmovie, Quantity.Ex_XY.value):
+    #         quantity = Quantity.Ex_XY
+    #     else:
+    #         quantity = Quantity.Ex
+    #     save_frames_from_3d_data(sim, quantity, None, Plane.XY)

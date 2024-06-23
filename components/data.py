@@ -25,7 +25,6 @@ class Movie:
         smoothing_sigma=0.0,
         **kwargs,
     ):
-        # todo: implement animate
         data = self.data
         if smoothing_sigma > 0:
             with mp.Pool(mp.cpu_count()) as pool:

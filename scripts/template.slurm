@@ -9,14 +9,11 @@
 
 module load mvapich2/2.3.6
 
-echo -e ${OUTPUT_DIR_PATH} > ${OUTPUT_DIR_PATH}/USE_DATA_DIRECTORY
-# save the input deck to the output directory
-if [ ! -f "decks/${EXP_NAME}/${DECK_NAME}.deck" ]; then
-    echo "${DECK_NAME}.deck file not found in folder decks/${EXP_NAME}"
-    exit 1
-fi
-cp decks/${EXP_NAME}/${DECK_NAME}.deck ${OUTPUT_DIR_PATH}/input.deck
-
-# execute the simulation
 cd ${OUTPUT_DIR_PATH}
+echo -e $(pwd) > $(pwd)/USE_DATA_DIRECTORY
+
+# adjust MPI cache size
+export MV2_NDREG_ENTRIES_MAX=32768
+export MV2_NDREG_ENTRIES=20480
+# execute the simulation
 mpiexec -n ${NUM_PROCS} ${EXECUTABLE_PATH} > ${OUTPUT_DIR_PATH}/epoch_log.txt
