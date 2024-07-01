@@ -13,7 +13,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s (%(levelname)s): %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
-logger = logging.getLogger("process_3d_data")
+logger = logging.getLogger("data_reduction")
 
 @timer
 def save_frames_from_3d_data(
@@ -96,8 +96,5 @@ if __name__ == "__main__":
     # for simulation_id in simulation_ids:
     #     sim = Simulation.from_simulation_id(simulation_id)
     #     fmovie = sh.getdata(os.path.join(sim.data_dir_path, "fmovie_0000.sdf"), verbose=False)
-    #     if hasattr(fmovie, Quantity.Ex_XY.value):
-    #         quantity = Quantity.Ex_XY
-    #     else:
-    #         quantity = Quantity.Ex
-    #     save_frames_from_3d_data(sim, quantity, None, Plane.XY)
+    #     if hasattr(fmovie, Quantity.Ex.value):
+    #         save_frames_from_3d_data(sim, Quantity.Ex, None, Plane.XY)

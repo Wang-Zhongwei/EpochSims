@@ -46,7 +46,7 @@ class GaussianBeam:
         if self.tau is None:
             raise ValueError("Pulse duration tau is required to calculate beam energy")
         I_0 = self.I_0 * 1e4
-        return pi * self.w_0**2 * I_0 * self.tau
+        return np.sqrt(pi**3/ 32) *self.w_0**2 * I_0 * self.tau
 
     @property
     def peak_electric_field(self):

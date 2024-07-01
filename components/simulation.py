@@ -10,12 +10,14 @@ from scipy.constants import elementary_charge, m_e, speed_of_light, Boltzmann as
 
 from configs.base_config import ANALYSIS_BASE_PATH, OUTPUT_BASE_PATH, REPO_PATH
 from configs.metadata import get_simulation_metadata, load_metadata
+from utils import get_tnsa_data
 
 from .domain import Domain
 from .enums import Plane, Quantity, Species
 from .laser import GaussianBeam
 from .target import Target
 from .data import Movie
+from scipy.integrate import odeint
 
 import sdf_helper as sh
 
@@ -182,7 +184,7 @@ class Simulation:
             Quantity.NUMBER_DENSITY: {
                 "norm": LogNorm(vmin=1e-2, vmax=1e2),
                 "cmap": "viridis",
-                "species": [Species.ELECTRON, Species.DEUTERON, Species.HYDROGEN],
+                "species": [Species.ELECTRON, Species.DEUTERON],
                 "normalization_factor": self.laser.critical_density,
                 "smoothing_sigma": 0.0,
                 # "smoothing_sigma": 0.001 * min(self.domain.grid_size),
@@ -191,11 +193,12 @@ class Simulation:
             Quantity.TEMPERATURE: {
                 "norm": LogNorm(vmin=1e-2, vmax=1e1),
                 "cmap": "plasma",
-                "species": [Species.ELECTRON],
-                "normalization_factor": pondermotive_temperature,
-                "smoothing_sigma": 0.0,
+                "species": [Species.ELECTRON, Species.DEUTERON],
+                "normalization_factor": K_in_MeV,
                 "cbar_label": r"$T$ [MeV]",
+                # "normalization_factor": pondermotive_temperature,
                 # "cbar_label": r"$T/T_p$",
+                "smoothing_sigma": 0.0,
             },
             Quantity.Px: {
                 "norm": SymLogNorm(linthresh=1e-2, linscale=1, vmin=-1000, vmax=1000),
@@ -281,3 +284,99 @@ class Simulation:
         else:
             data = self.load_data_from_npy(quantity, species, plane)
             return data[frame_number]
+    
+    def get_deuteorn_spectrum(self, frame_number: int, num_bins = 100, file_prefix = "pmovie") -> tuple[np.ndarray, np.ndarray]:
+        """Get deuteron energy spectrum at `frame_number`
+
+        Args:
+            frame_number (int): frame at which to get the spectrum
+            num_bins (int, optional): Number of linear sized energy bins. Defaults to 50.
+            file_prefix (str, optional): prefix of the file that contains deuteron TNSA data. Defaults to "pmovie".
+
+        Returns:
+            tuple[np.ndarray, np.ndarray]: E, dN/dE
+        """             
+        if not hasattr(self, "tnsa_data"):
+            self.tnsa_data = {}
+            
+        if self.tnsa_data.get(frame_number) is None:
+            pmovie = sh.getdata(
+                os.path.join(self.data_dir_path, f"{file_prefix}_{frame_number:04d}.sdf"),
+                verbose=False,
+            )
+            self.tnsa_data[frame_number] = get_tnsa_data(pmovie)
+    
+        frame_data = self.tnsa_data[frame_number]
+        data, weight = frame_data
+        
+        counts, bin_edges = np.histogram(
+            data / 1e6 / elementary_charge,
+            bins=num_bins,
+            weights=weight,
+        )
+        
+        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+        dE = np.diff(bin_edges)
+        dNdE = counts / dE
+        
+        return bin_centers, dNdE
+    
+    def calc_neutron_yield(self, d: float, cross_section_func: callable, multiplicity_func: callable, frame_idx = -1):
+        """Calculate neutron yield for a given thickness `d` (m) and cross section function
+
+        Args:
+            d (float): thickness of the target in meters
+            cross_section_func (callable): cross_section_func(E) returns the cross section [mbar] at energy E [MeV]
+            multiplicity_func (callable): multiplicity_func(E) returns the average multiplicity of neutrons at energy E [MeV]
+            frame_idx (int, optional): select which frame to calculate the neutron yield. Defaults to -1, means the last frame. 
+
+        Returns:
+            int: Estimated neutron yield
+        """        
+        # Constants
+        m_p = 1.673e-27  # proton mass in kg
+        m_e = 0.511  # electron mass in MeV
+        m_d = 1875.6  # deuteron mass in MeV
+        
+        # Deuteron
+        z = 1
+
+        # Beryllium properties
+        Z = 4  # atomic number of beryllium
+        A = 9.0122  # atomic mass of beryllium
+        rho = 1.85  # density of beryllium in g/cm^3
+        I = 63.7e-6  # mean excitation energy of beryllium in MeV
+            
+        # Bethe formula for deuterons (Z_projectile = 1) in beryllium
+        def dEdx(E, x):
+            gamma = E / m_d + 1
+            beta = np.sqrt(1 - 1/gamma**2)
+            T_max = 2 * m_e * beta**2 * gamma**2 / (1 + 2*gamma*m_e/m_d + (m_e/m_d)**2)
+            
+            return -0.307 * z**2 * (Z / A) * rho / beta**2 * (1/2 *
+                np.log(2 * m_e * beta**2 * gamma**2 * T_max / I**2) 
+                - beta**2
+            )
+
+        def solve_bethe(E0, x_range):
+            return odeint(dEdx, E0, x_range)
+        
+        Y = 0
+        n_Be = rho * 1e3 / (A * m_p)
+        d *= 1e2 # convert from m to cm
+        
+        if frame_idx == -1:
+            num_frames = self.get_num_frames("pmovie")
+            frame_idx = num_frames - 1
+            
+        E, dNdE = self.get_deuteorn_spectrum(frame_idx)
+        delta_E = E[1] - E[0]
+        
+        x_range = np.linspace(0, d, 100)
+        delta_x = (x_range[1] - x_range[0]) * 1e-2 # convert from cm to m 
+        for E0, dNdE0 in zip(E, dNdE):
+            E_of_x = solve_bethe(E0, x_range)
+            Y += np.sum(cross_section_func(E_of_x) * 1e-31 * multiplicity_func(E_of_x)) * dNdE0
+        
+        Y *= n_Be * delta_E * delta_x
+        return round(Y)
