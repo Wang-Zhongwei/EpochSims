@@ -359,6 +359,8 @@ class Simulation:
         cross_section_func: callable,
         multiplicity_func: callable,
         frame_idx=-1,
+        num_bins=200,
+        return_histogram=False,
     ):
         """Calculate neutron yield for a given thickness `d` (m) and cross section function
 
@@ -367,9 +369,14 @@ class Simulation:
             cross_section_func (callable): cross_section_func(E) returns the cross section [mbar] at energy E [MeV]
             multiplicity_func (callable): multiplicity_func(E) returns the average multiplicity of neutrons at energy E [MeV]
             frame_idx (int, optional): select which frame to calculate the neutron yield. Defaults to -1, means the last frame.
+            num_bins (int, optional): number of energy bins for integration
+            return_histogram (bool, optional): if True, return energy and yield arrays. Defaults to False.
 
         Returns:
-            int: Estimated neutron yield
+            If return_histogram is False:
+                int: Estimated total neutron yield
+            If return_histogram is True:
+                tuple: (E, Y) where E is the energy array and Y is the corresponding yield array
         """
         # Constants
         m_p = 1.673e-27  # proton mass in kg
@@ -409,10 +416,11 @@ class Simulation:
                 )
             )
 
-        def solve_bethe(E0, x_range):
-            return odeint(dEdx, E0, x_range)
+        def solve_bethe(E0, x_range, bethe_boundary=0.06):
+            sol = odeint(dEdx, E0, x_range)
+            sol[sol < bethe_boundary] = 0
+            return sol
 
-        Y = 0
         n_Be = rho * 1e3 / (A * m_p)
         d *= 1e2  # convert from m to cm
 
@@ -420,17 +428,24 @@ class Simulation:
             num_frames = self.get_num_frames("pmovie")
             frame_idx = num_frames - 1
 
-        E, dNdE = self.get_spectrum(Species.DEUTERON, frame_idx, num_bins=200, log_bins=False)
+        E, dNdE = self.get_spectrum(Species.DEUTERON, frame_idx, num_bins=num_bins, log_bins=False)
         delta_E = E[1] - E[0]
 
         x_range = np.linspace(0, d, 100)
         delta_x = (x_range[1] - x_range[0]) * 1e-2  # convert from cm to m
-        for E0, dNdE0 in zip(E, dNdE):
+
+        Y = np.zeros_like(E)
+        for i, (E0, dNdE0) in enumerate(zip(E, dNdE)):
             E_of_x = solve_bethe(E0, x_range)
-            Y += (
+            Y[i] = (
                 np.sum(cross_section_func(E_of_x) * 1e-31 * multiplicity_func(E_of_x))
                 * dNdE0
+                * n_Be
+                * delta_E
+                * delta_x
             )
 
-        Y *= n_Be * delta_E * delta_x
-        return round(Y)
+        if return_histogram:
+            return E, Y
+        else:
+            return round(np.sum(Y))
