@@ -34,7 +34,7 @@ deck_path = f"decks/{args.experiment_name}/{deck_name}"
 if not os.path.exists(deck_path):
     print(f"{deck_name} does not exist")
     sys.exit(1)
-    
+
 shutil.copy(deck_path, ouput_dir_path + "/input.deck")
 
 # load template.sh

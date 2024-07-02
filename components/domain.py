@@ -11,14 +11,14 @@ class Domain:
 
     def __repr__(self):
         return f"Domain(boundaries={self.boundaries} m, grid_size={self.grid_size}, time_interval={self.time_interval} s)"
-    
+
     def get_spacing_x(self):
         return (self.boundaries[0][1] - self.boundaries[0][0]) / self.grid_size[0]
-    
+
     def get_spacing_y(self):
         assert len(self.grid_size) >= 2
         return (self.boundaries[1][1] - self.boundaries[1][0]) / self.grid_size[1]
-    
+
     def get_spacing_z(self):
         assert len(self.grid_size) == 3
         return (self.boundaries[2][1] - self.boundaries[2][0]) / self.grid_size[2]

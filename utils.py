@@ -25,24 +25,32 @@ def timer(func):
     return wrapper
 
 
-def get_tnsa_data(pmovie: sdf.BlockList) -> tuple[np.ndarray, np.ndarray]:
-    if hasattr(pmovie, "Particles_Ek_subset_TNSA_Hydrogen"):
-        energy = pmovie.Particles_Ek_subset_TNSA_Hydrogen
-    elif hasattr(pmovie, "Particles_Ek_subset_TNSA_Deuteron"):
-        energy = pmovie.Particles_Ek_subset_TNSA_Deuteron
-    elif hasattr(pmovie, "Particles_Ek_subset_TNSA_Deuteron_Deuteron"):
-        energy = pmovie.Particles_Ek_subset_TNSA_Deuteron_Deuteron
-    else:
-        raise ValueError("No TNSA energy data found")
+def get_weight_and_energy(pmovie: sdf.BlockList, species: Species) -> tuple[np.ndarray, np.ndarray]:
+    
+    if species == Species.DEUTERON:
+        if hasattr(pmovie, "Particles_Ek_subset_TNSA_Hydrogen"):
+            energy = pmovie.Particles_Ek_subset_TNSA_Hydrogen
+        elif hasattr(pmovie, "Particles_Ek_subset_TNSA_Deuteron"):
+            energy = pmovie.Particles_Ek_subset_TNSA_Deuteron
+        elif hasattr(pmovie, "Particles_Ek_subset_TNSA_Deuteron_Deuteron"):
+            energy = pmovie.Particles_Ek_subset_TNSA_Deuteron_Deuteron
+        else:
+            raise ValueError("No TNSA energy data found")
 
-    if hasattr(pmovie, "Particles_Weight_subset_TNSA_Hydrogen"):
-        weight = pmovie.Particles_Weight_subset_TNSA_Hydrogen
-    elif hasattr(pmovie, "Particles_Weight_subset_TNSA_Deuteron"):
-        weight = pmovie.Particles_Weight_subset_TNSA_Deuteron
-    elif hasattr(pmovie, "Particles_Weight_subset_TNSA_Deuteron_Deuteron"):
-        weight = pmovie.Particles_Weight_subset_TNSA_Deuteron_Deuteron
+        if hasattr(pmovie, "Particles_Weight_subset_TNSA_Hydrogen"):
+            weight = pmovie.Particles_Weight_subset_TNSA_Hydrogen
+        elif hasattr(pmovie, "Particles_Weight_subset_TNSA_Deuteron"):
+            weight = pmovie.Particles_Weight_subset_TNSA_Deuteron
+        elif hasattr(pmovie, "Particles_Weight_subset_TNSA_Deuteron_Deuteron"):
+            weight = pmovie.Particles_Weight_subset_TNSA_Deuteron_Deuteron
+        else:
+            raise ValueError("No TNSA weight data found")
+        
+    elif species == Species.ELECTRON:
+        energy = pmovie.Particles_Ek_subset_ElectronPMovie_Electron
+        weight = pmovie.Particles_Weight_subset_ElectronPMovie_Electron
     else:
-        raise ValueError("No TNSA weight data found")
+        raise ValueError(f"Species '{species.value}' not recognized")
 
     return energy.data, weight.data
 

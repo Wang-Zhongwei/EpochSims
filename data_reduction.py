@@ -15,6 +15,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("data_reduction")
 
+
 @timer
 def save_frames_from_3d_data(
     simulation: Simulation,
@@ -34,13 +35,13 @@ def save_frames_from_3d_data(
 
         attr_name = quantity.get_attribute_name(species)
         quantity_sdf = read_quantity_sdf_from_sdf(data, attr_name)
-        
+
         logger.debug(f"Shape of the quantity_sdf: {quantity_sdf.data.shape}")
 
         planar_quantity_data = simulation.domain.get_planar_data(
             quantity_sdf.data, plane
         )
-        
+
         logger.debug(f"Shape of the planar_quantity_data: {planar_quantity_data.shape}")
         data_list.append(np.expand_dims(planar_quantity_data, axis=0))
 
@@ -91,7 +92,7 @@ if __name__ == "__main__":
                         logger.error(
                             f"Error saving frames for {quantity.value} {species.value} {plane.value}: {e}"
                         )
-        
+
     # save Ex data
     # for simulation_id in simulation_ids:
     #     sim = Simulation.from_simulation_id(simulation_id)

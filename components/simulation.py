@@ -10,7 +10,7 @@ from scipy.constants import elementary_charge, m_e, speed_of_light, Boltzmann as
 
 from configs.base_config import ANALYSIS_BASE_PATH, OUTPUT_BASE_PATH, REPO_PATH
 from configs.metadata import get_simulation_metadata, load_metadata
-from utils import get_tnsa_data
+from utils import get_weight_and_energy
 
 from .domain import Domain
 from .enums import Plane, Quantity, Species
@@ -59,7 +59,7 @@ class Simulation:
 
     def __repr__(self):
         return f"Simulation(simulation_id='{self.simulation_id}', laser={repr(self.laser)}, domain={repr(self.domain)}, target={repr(self.target)})"
-    
+
     def __str__(self):
         return f"Simulation with id {self.simulation_id}"
 
@@ -131,7 +131,16 @@ class Simulation:
         pondermotive_temperature = (
             m_e
             * speed_of_light**2
-            * (sqrt(1 + self.calc_beam_intensity_on_target() * (self.laser.lambda_0 * 1e6)**2 / 1.37e18) - 1) / k_B
+            * (
+                sqrt(
+                    1
+                    + self.calc_beam_intensity_on_target()
+                    * (self.laser.lambda_0 * 1e6) ** 2
+                    / 1.37e18
+                )
+                - 1
+            )
+            / k_B
         )
         return {
             Quantity.Ex: {
@@ -221,7 +230,7 @@ class Simulation:
         axial_distance = -self.laser.focus_x / cos(self.laser.incidence_theta)
         return self.laser.calc_intensity(axial_distance)
 
-    def get_num_frames(self, file_prefix: str):
+    def get_num_frames(self, file_prefix = "pmovie"):
         all_files = os.listdir(self.data_dir_path)
         matching_files = [
             f for f in all_files if f.startswith(file_prefix) and f.endswith(".sdf")
@@ -284,60 +293,89 @@ class Simulation:
         else:
             data = self.load_data_from_npy(quantity, species, plane)
             return data[frame_number]
-    
-    def get_deuteorn_spectrum(self, frame_number: int, num_bins = 100, file_prefix = "pmovie") -> tuple[np.ndarray, np.ndarray]:
-        """Get deuteron energy spectrum at `frame_number`
+
+    def get_spectrum(
+        self,
+        species: Species,
+        frame_number: int,
+        num_bins=50,
+        log_bins=False,
+        file_prefix="pmovie",
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Get species energy spectrum at `frame_number`
 
         Args:
             frame_number (int): frame at which to get the spectrum
-            num_bins (int, optional): Number of linear sized energy bins. Defaults to 50.
+            species: Species: Species for which to get the spectrum
+            frame_number (int): Frame number at which to get the spectrum
+            num_bins (int, optional): Number of bins. Defaults to 25.
+            log_bins (bool, optional): If True, use log-spaced bins. Defaults to False.
             file_prefix (str, optional): prefix of the file that contains deuteron TNSA data. Defaults to "pmovie".
 
         Returns:
-            tuple[np.ndarray, np.ndarray]: E, dN/dE
-        """             
-        if not hasattr(self, "tnsa_data"):
-            self.tnsa_data = {}
-            
-        if self.tnsa_data.get(frame_number) is None:
+            tuple[np.ndarray, np.ndarray]: E [MeV], dN/dE
+        """
+        if not hasattr(self, "spectrum_data"):
+            self.spectrum_data = {}
+        
+        if species.value not in self.spectrum_data:
+            self.spectrum_data[species.value] = {}
+        
+        species_spectrum_data = self.spectrum_data[species.value]
+        if species_spectrum_data.get(frame_number) is None:
             pmovie = sh.getdata(
-                os.path.join(self.data_dir_path, f"{file_prefix}_{frame_number:04d}.sdf"),
+                os.path.join(
+                    self.data_dir_path, f"{file_prefix}_{frame_number:04d}.sdf"
+                ),
                 verbose=False,
             )
-            self.tnsa_data[frame_number] = get_tnsa_data(pmovie)
-    
-        frame_data = self.tnsa_data[frame_number]
+            species_spectrum_data[frame_number] = get_weight_and_energy(pmovie, species)
+
+        frame_data = species_spectrum_data[frame_number]
         data, weight = frame_data
-        
-        counts, bin_edges = np.histogram(
-            data / 1e6 / elementary_charge,
-            bins=num_bins,
+        data = data / 1e6 / elementary_charge
+
+        min, max = 1, 200
+        if log_bins:
+            bin_edges = np.logspace(np.log10(min), np.log10(max), num_bins + 1)
+        else:
+            bin_edges = np.linspace(min, max, num_bins + 1)
+
+        counts, _ = np.histogram(
+            data,
+            bins=bin_edges,
             weights=weight,
         )
-        
-        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+        E = (bin_edges[:-1] + bin_edges[1:]) / 2
         dE = np.diff(bin_edges)
         dNdE = counts / dE
-        
-        return bin_centers, dNdE
-    
-    def calc_neutron_yield(self, d: float, cross_section_func: callable, multiplicity_func: callable, frame_idx = -1):
+
+        return E, dNdE
+
+    def calc_neutron_yield(
+        self,
+        d: float,
+        cross_section_func: callable,
+        multiplicity_func: callable,
+        frame_idx=-1,
+    ):
         """Calculate neutron yield for a given thickness `d` (m) and cross section function
 
         Args:
             d (float): thickness of the target in meters
             cross_section_func (callable): cross_section_func(E) returns the cross section [mbar] at energy E [MeV]
             multiplicity_func (callable): multiplicity_func(E) returns the average multiplicity of neutrons at energy E [MeV]
-            frame_idx (int, optional): select which frame to calculate the neutron yield. Defaults to -1, means the last frame. 
+            frame_idx (int, optional): select which frame to calculate the neutron yield. Defaults to -1, means the last frame.
 
         Returns:
             int: Estimated neutron yield
-        """        
+        """
         # Constants
         m_p = 1.673e-27  # proton mass in kg
         m_e = 0.511  # electron mass in MeV
         m_d = 1875.6  # deuteron mass in MeV
-        
+
         # Deuteron
         z = 1
 
@@ -346,37 +384,53 @@ class Simulation:
         A = 9.0122  # atomic mass of beryllium
         rho = 1.85  # density of beryllium in g/cm^3
         I = 63.7e-6  # mean excitation energy of beryllium in MeV
-            
+
         # Bethe formula for deuterons (Z_projectile = 1) in beryllium
         def dEdx(E, x):
             gamma = E / m_d + 1
-            beta = np.sqrt(1 - 1/gamma**2)
-            T_max = 2 * m_e * beta**2 * gamma**2 / (1 + 2*gamma*m_e/m_d + (m_e/m_d)**2)
-            
-            return -0.307 * z**2 * (Z / A) * rho / beta**2 * (1/2 *
-                np.log(2 * m_e * beta**2 * gamma**2 * T_max / I**2) 
-                - beta**2
+            beta = np.sqrt(1 - 1 / gamma**2)
+            T_max = (
+                2
+                * m_e
+                * beta**2
+                * gamma**2
+                / (1 + 2 * gamma * m_e / m_d + (m_e / m_d) ** 2)
+            )
+
+            return (
+                -0.307
+                * z**2
+                * (Z / A)
+                * rho
+                / beta**2
+                * (
+                    1 / 2 * np.log(2 * m_e * beta**2 * gamma**2 * T_max / I**2)
+                    - beta**2
+                )
             )
 
         def solve_bethe(E0, x_range):
             return odeint(dEdx, E0, x_range)
-        
+
         Y = 0
         n_Be = rho * 1e3 / (A * m_p)
-        d *= 1e2 # convert from m to cm
-        
+        d *= 1e2  # convert from m to cm
+
         if frame_idx == -1:
             num_frames = self.get_num_frames("pmovie")
             frame_idx = num_frames - 1
-            
-        E, dNdE = self.get_deuteorn_spectrum(frame_idx)
+
+        E, dNdE = self.get_spectrum(Species.DEUTERON, frame_idx, num_bins=200, log_bins=False)
         delta_E = E[1] - E[0]
-        
+
         x_range = np.linspace(0, d, 100)
-        delta_x = (x_range[1] - x_range[0]) * 1e-2 # convert from cm to m 
+        delta_x = (x_range[1] - x_range[0]) * 1e-2  # convert from cm to m
         for E0, dNdE0 in zip(E, dNdE):
             E_of_x = solve_bethe(E0, x_range)
-            Y += np.sum(cross_section_func(E_of_x) * 1e-31 * multiplicity_func(E_of_x)) * dNdE0
-        
+            Y += (
+                np.sum(cross_section_func(E_of_x) * 1e-31 * multiplicity_func(E_of_x))
+                * dNdE0
+            )
+
         Y *= n_Be * delta_E * delta_x
         return round(Y)
