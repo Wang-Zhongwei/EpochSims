@@ -934,6 +934,239 @@
             "grid_size": [2000, 2000, 2000],
             "time_interval": [0, 400e-15]
         }
+    },
+    {
+        "id": "2.6e21_on_target_half_macroparticles_20240714",
+        "data_dir_rel_path": "3D_larger_spot_size/2.6e21_on_target_half_macroparticles_20240714",
+        "laser": {
+            "lambda_0": 815e-9,
+            "I_0": 2.6e21,
+            "w_0": 2.5e-6,
+            "tau": 45e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": 0,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 10e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-30e-6, 30e-6], [-17.574e-6, 42.427e-6], [-30e-6, 30e-6]],
+            "grid_size": [2000, 2000, 2000],
+            "time_interval": [0, 340e-15]
+        }
+    },
+    {
+        "id": "2.6e21_on_target_quarter_macroparticles_20240717",
+        "data_dir_rel_path": "3D_larger_spot_size/2.6e21_on_target_quarter_macroparticles_20240717",
+        "laser": {
+            "lambda_0": 815e-9,
+            "I_0": 2.6e21,
+            "w_0": 2.5e-6,
+            "tau": 45e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": 0,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 10e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-30e-6, 30e-6], [-17.574e-6, 42.427e-6], [-30e-6, 30e-6]],
+            "grid_size": [2000, 2000, 2000],
+            "time_interval": [0, 400e-15]
+        }
+    },
+    {
+        "id": "2.6e21_on_target_half_macroparticles_0.7um_20240722",
+        "data_dir_rel_path": "3D_larger_spot_size/2.6e21_on_target_half_macroparticles_0.7um_20240722",
+        "laser": {
+            "lambda_0": 815e-9,
+            "I_0": 2.6e21,
+            "w_0": 2.5e-6,
+            "tau": 45e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": 0,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 10e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-30e-6, 30e-6], [-17.574e-6, 42.427e-6], [-30e-6, 30e-6]],
+            "grid_size": [2000, 2000, 2000],
+            "time_interval": [0, 400e-15]
+        }
+    },
+    {
+        "id": "2.6e21_on_target_half_macroparticles_0.3um_20240723",
+        "data_dir_rel_path": "3D_larger_spot_size/2.6e21_on_target_half_macroparticles_0.3um_20240723",
+        "laser": {
+            "lambda_0": 815e-9,
+            "I_0": 2.6e21,
+            "w_0": 2.5e-6,
+            "tau": 45e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": 0,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 10e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-30e-6, 30e-6], [-17.574e-6, 42.427e-6], [-30e-6, 30e-6]],
+            "grid_size": [2000, 2000, 2000],
+            "time_interval": [0, 400e-15]
+        }
+    },
+    {
+        "id": "2.6e21_on_target_half_macroparticles_35deg_20240723",
+        "data_dir_rel_path": "3D_larger_spot_size/2.6e21_on_target_half_macroparticles_35deg_20240723",
+        "laser": {
+            "lambda_0": 815e-9,
+            "I_0": 2.6e21,
+            "w_0": 2.5e-6,
+            "tau": 45e-15,
+            "incidence_angle": 35,
+            "focus": {
+                "x": 0,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 10e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-30e-6, 30e-6], [-9e-6, 51e-6], [-30e-6, 30e-6]],
+            "grid_size": [2000, 2000, 2000],
+            "time_interval": [0, 400e-15]
+        }
+    },
+    {
+        "id": "2.6e21_off_target_half_macroparticles_35deg_20240727",
+        "data_dir_rel_path": "3D_larger_spot_size/2.6e21_off_target_half_macroparticles_35deg_20240727",
+        "laser": {
+            "lambda_0": 815e-9,
+            "I_0": 2.6e21,
+            "w_0": 2.5e-6,
+            "tau": 45e-15,
+            "incidence_angle": 35,
+            "focus": {
+                "x": -100e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 10e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-30e-6, 30e-6], [-9e-6, 51e-6], [-30e-6, 30e-6]],
+            "grid_size": [2000, 2000, 2000],
+            "time_interval": [0, 400e-15]
+        }
+    },
+    {
+        "id": "2.6e21_off_target_half_macroparticles_20240801",
+        "data_dir_rel_path": "3D_larger_spot_size/2.6e21_off_target_half_macroparticles_20240801",
+        "laser": {
+            "lambda_0": 815e-9,
+            "I_0": 2.6e21,
+            "w_0": 2.5e-6,
+            "tau": 45e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": -100e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 10e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-30e-6, 30e-6], [-17.574e-6, 42.427e-6], [-30e-6, 30e-6]],
+            "grid_size": [2000, 2000, 2000],
+            "time_interval": [0, 400e-15]
+        }
+    },
+    {
+        "id": "2.6e21_-200_half_macroparticles_35deg_20240812",
+        "data_dir_rel_path": "3D_larger_spot_size/2.6e21_-200_half_macroparticles_35deg_20240812",
+        "laser": {
+            "lambda_0": 815e-9,
+            "I_0": 2.6e21,
+            "w_0": 2.5e-6,
+            "tau": 45e-15,
+            "incidence_angle": 35,
+            "focus": {
+                "x": -200e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 10e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-30e-6, 30e-6], [-17.574e-6, 42.427e-6], [-30e-6, 30e-6]],
+            "grid_size": [2000, 2000, 2000],
+            "time_interval": [0, 400e-15]
+        }
+    },
+    {
+        "id": "2.6e21_-200_half_macroparticles_22deg_20240812",
+        "data_dir_rel_path": "3D_larger_spot_size/2.6e21_-200_half_macroparticles_22deg_20240812",
+        "laser": {
+            "lambda_0": 815e-9,
+            "I_0": 2.6e21,
+            "w_0": 2.5e-6,
+            "tau": 45e-15,
+            "incidence_angle": 22.5,
+            "focus": {
+                "x": -200e-6,
+                "y": 0
+            }
+        },
+        "target": {
+            "material": "8CB",
+            "electron_number_density": 3.274368e29,
+            "thickness": 10e-9,
+            "has_preplasma": true
+        },
+        "domain": {
+            "boundaries": [[-30e-6, 30e-6], [-17.574e-6, 42.427e-6], [-30e-6, 30e-6]],
+            "grid_size": [2000, 2000, 2000],
+            "time_interval": [0, 400e-15]
+        }
     }
-    
 ]

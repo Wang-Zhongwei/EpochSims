@@ -128,20 +128,7 @@ class Simulation:
             * elementary_charge
             / self.laser.angular_frequency
         )
-        pondermotive_temperature = (
-            m_e
-            * speed_of_light**2
-            * (
-                sqrt(
-                    1
-                    + self.calc_beam_intensity_on_target()
-                    * (self.laser.lambda_0 * 1e6) ** 2
-                    / 1.37e18
-                )
-                - 1
-            )
-            / k_B
-        )
+        pondermotive_temperature = self.calc_pondermotive_electron_temperature()
         return {
             Quantity.Ex: {
                 "norm": SymLogNorm(
@@ -183,7 +170,7 @@ class Simulation:
                 "cbar_label": r"$\frac{eE_z}{m_e c\omega}$",
             },
             Quantity.CHARGE_DENSITY: {
-                "norm": SymLogNorm(linthresh=1e-2, linscale=1),
+                "norm": SymLogNorm(linthresh=1e-2, linscale=1, vmin=-1, vmax=1),
                 "cmap": "bwr",
                 "species": [None],
                 "normalization_factor": self.laser.critical_density * elementary_charge,
@@ -225,10 +212,24 @@ class Simulation:
 
     def calc_beam_area_on_target(self):
         return pi * self.calc_beam_radius_on_target() ** 2
-
+    
     def calc_beam_intensity_on_target(self):
         axial_distance = -self.laser.focus_x / cos(self.laser.incidence_theta)
         return self.laser.calc_intensity(axial_distance)
+
+    def calc_pondermotive_electron_temperature(self):
+        """Calculates hot electron temperature [MeV] using pondermotive scaling law
+        """        
+        return m_e * speed_of_light**2 * (
+                sqrt(
+                    1
+                    + self.calc_beam_intensity_on_target()
+                    * (self.laser.lambda_0 * 1e6) ** 2
+                    / (1.37e18 * 2)
+                )
+                - 1
+            ) / 1e6 / elementary_charge
+        
 
     def get_num_frames(self, file_prefix = "pmovie"):
         all_files = os.listdir(self.data_dir_path)

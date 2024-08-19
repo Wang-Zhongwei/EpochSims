@@ -21,7 +21,7 @@ default_quantities = [
     # Quantity.Ex,
     Quantity.CHARGE_DENSITY,
     Quantity.NUMBER_DENSITY,
-    Quantity.TEMPERATURE,
+    # Quantity.TEMPERATURE,
     # Quantity.Px,
 ]
 
